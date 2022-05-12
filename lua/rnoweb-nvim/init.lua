@@ -1,6 +1,7 @@
 local M = {}
 
 local sym = require'rnoweb-nvim.symbols'
+local h   = require'rnoweb-nvim.helpers'
 
 local function i(...)
   print(vim.inspect(...))
@@ -20,49 +21,16 @@ local function lines_from(file)
   end
   return lines
 end
---
--- Function to get length of string in charachter count, not byte count
-local slen = function(s)
-  local _, count = string.gsub(s, "[^\128-\193]", "")
-  return count
-end
 
 local function gtext(node)
   local l0, c0, l1, c1 = node:range()
-
   local lines = vim.api.nvim_buf_get_lines(M.info.bufnr, l0, l1 + 1, false)
   local out = lines[1]
   out = string.sub(out, c0 + 1, c1)
   return(out)
 end
 
-local function add_front(s, n)
-  for _=1,n do
-    s = " " .. s
-  end
-  return s
-end
-
-local function add_back(s, n)
-  for _=1,n do
-    s = s .." "
-  end
-  return s
-end
-
-local function center_pad(s, a)
-  local famt = a % 2 == 0 and a / 2 or math.floor(a / 2)
-  local bamt = a % 2 == 0 and a / 2 or math.ceil(a / 2)
-  s = add_front(s, famt)
-  s = add_back(s, bamt)
-  return s
-end
-
 M.dcount = 0
-local dbug =  function()
-  M.dcount = M.dcount + 1
-  print("@@here" .. M.dcount)
-end
 
 M.info = {
   ns    = vim.api.nvim_create_namespace("rnoweb_inline"),
@@ -115,8 +83,8 @@ M.mask_inline = function()
 
         text = text and text or ntext
         text = string.sub(text, 1, clen)
-        local pad_amt = clen - slen(text)
-        text = center_pad(text, pad_amt)
+        local pad_amt = clen - h.slen(text)
+        text = h.center_pad(text, pad_amt)
 
         local opts = {
           end_col = c1,
@@ -138,9 +106,9 @@ local function conceal_symbol(node, cmd)
 
   local text = sym.get(cmd)
   text = string.sub(text, 1, clen)
-  local pad_amt = clen - slen(text)
+  local pad_amt = clen - h.slen(text)
 
-  text = center_pad(text, pad_amt)
+  text = h.center_pad(text, pad_amt)
 
   local opts = {
     end_col = c1,
@@ -155,25 +123,79 @@ M.mask_texsym = function()
   --
   -- Shortcuts
   local q  = vim.treesitter.query
-
   local ntp    = require'nvim-treesitter.parsers'
   local parser = ntp.get_parser(0)
-
-  local author = q.parse_query("latex", "(generic_command (command_name) @cmd)")
+  local cmd_q = q.parse_query("latex", "(generic_command (command_name) @cmd)")
 
   parser:for_each_tree(function(_, tree)
     local ttree = tree:parse()
     local root  = ttree[1]:root()
-
-    for _, node, _ in author:iter_captures(root, M.info.bufnr) do
+    for _, node, _ in cmd_q:iter_captures(root, M.info.bufnr) do
       local cmd = gtext(node)
       if sym.map[cmd] then
         conceal_symbol(node, cmd)
       end
     end
-
-
   end)
+
+end
+
+M.make_spell = function()
+  -- Shortcuts
+  local q  = vim.treesitter.query
+  local ntp    = require'nvim-treesitter.parsers'
+  local parser = ntp.get_parser(0)
+  local author = q.parse_query("latex", "(generic_command (command_name) @cmd)")
+
+  local cmds = {}
+
+  -- Save all the command names in a table
+  parser:for_each_tree(function(_, tree)
+    local ttree = tree:parse()
+    local root  = ttree[1]:root()
+    for _, node, _ in author:iter_captures(root, M.info.bufnr) do
+      local txt = gtext(node)
+      txt = string.sub(txt, 2)
+      cmds[txt] = 1
+    end
+  end)
+
+  -- The words file
+  local fname = "/home/bam/.config/nvim/spell/latex"
+  local lwords = fname .. ".words"
+  local spellfile = fname .. ".utf-8.spl"
+
+
+  -- Get rid of the words file if it exists
+  if file_exists(lwords) then
+    os.remove(lwords)
+  end
+
+  local fp = io.open(lwords, "a")
+  for k,_ in pairs(cmds) do
+    fp:write(k, "\n")
+  end
+  fp:close()
+
+  local mks = "silent mkspell! "
+  mks = mks .. spellfile .. " "
+  mks = mks .. lwords
+  vim.cmd(mks)
+
+  local splang = vim.o.spelllang
+  splang = h.split(splang, ",")
+
+  if not h.isin("latex", splang) then
+    splang[#splang+1] = "latex"
+  end
+
+  local s = ""
+  for _, l in pairs(splang) do
+    s = s .. l .. ","
+  end
+
+  local val = "silent set spelllang=" .. s
+  vim.cmd(val)
 
 end
 

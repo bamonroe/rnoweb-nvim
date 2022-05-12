@@ -13,3 +13,7 @@ end)
 vim.keymap.set('n', "<leader>f", function()
   require('rnoweb-nvim').del_inline()
 end)
+
+vim.keymap.set('n', "<leader>s", function()
+  require('rnoweb-nvim').make_spell()
+end)
