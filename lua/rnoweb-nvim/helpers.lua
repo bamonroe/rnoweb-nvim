@@ -19,7 +19,6 @@ M.split = function(pString, pPattern)
    return Table
 end
 
-
 local add_front = function(s, n)
   for _=1,n do
     s = " " .. s
@@ -35,8 +34,8 @@ local add_back = function(s, n)
 end
 
 M.center_pad = function(s, a)
-  local famt = a % 2 == 0 and a / 2 or math.floor(a / 2)
-  local bamt = a % 2 == 0 and a / 2 or math.ceil(a / 2)
+  local famt = math.floor(a / 2)
+  local bamt = math.ceil(a / 2)
   s = add_front(s, famt)
   s = add_back(s, bamt)
   return s
@@ -56,6 +55,37 @@ M.isin = function(v, t)
     end
   end
   return res
+end
+
+-- Check if a file exists
+M.file_exists = function(file)
+  local f = io.open(file, "rb")
+  if f then f:close() end
+  return f ~= nil
+end
+
+-- Read lines from file into a table
+M.read_lines = function(file)
+  if not M.file_exists(file) then return {} end
+  local lines = {}
+  for line in io.lines(file) do
+    lines[#lines + 1] = line
+  end
+  return lines
+end
+
+M.write_lines = function(file, lines)
+  -- Get rid of the words file if it exists
+  if M.file_exists(file) then
+    os.remove(file)
+  end
+
+  local fp = io.open(file, "a")
+  for k,_ in pairs(lines) do
+    fp:write(k, "\n")
+  end
+  fp:close()
+
 end
 
 return M
