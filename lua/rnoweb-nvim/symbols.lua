@@ -52,7 +52,7 @@ M.sym['\\succ']        = "≻"
 M.sym['\\prec']        = "≺"
 M.sym['\\int']         = "∫"
 M.sym['\\sum']         = "∑"
-M.sym['\\ln']          = "ln"
+M.sym['\\ln']          = " ln"
 M.sym['\\exp']         = "   e"
 M.sym['\\in']          = "Є"
 M.sym['\\lbrace']      = "{"
@@ -71,18 +71,26 @@ M.sym['\\;']         = ""
 M.sym['\\!']         = ""
 M.sym['\\textcite']  = ""
 M.sym['\\parencite'] = ""
+M.sym['\\left']  = ""
+M.sym['\\right'] = ""
+
+-- Same map for underscored text
+for k, _ in pairs(M.sym) do
+  M.sym[k .. "_"] = M.sym[k] .. "_"
+end
 
 -- Make a map that points to the keys of sym
 M.map = {}
 for k, _ in pairs(M.sym) do
+
   M.map[k]         = k
   -- Map underscored chars to the same keys
-  M.map[k .. "_" ] = k
+  --M.map[k .. "_" ] = k
 end
 
 -- Some left/right commands
-M.sym['\\left\\lbrace']  = "\\lbrace"
-M.sym['\\right\\rbrace'] = "\\rbrace"
+--M.sym['\\left\\lbrace']  = "\\lbrace"
+--M.sym['\\right\\rbrace'] = "\\rbrace"
 
 
 M.get = function(m)

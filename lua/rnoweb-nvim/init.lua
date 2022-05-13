@@ -35,7 +35,6 @@ M.mask_inline = function()
   local inline = q.parse_query("rnoweb", "(rinline (renv_content) @inline_content)")
 
   local count = 0
-
   for _, match, _ in inline:iter_matches(root, M.info.bufnr) do
     for _, node in pairs(match) do
       count = count + 1
@@ -46,27 +45,22 @@ M.mask_inline = function()
       -- Get the text that will be in this ndoe
       local fname = "./inline/" .. count .. ".txt"
       local text = h.read_lines(fname)[1]
+      -- Length of the space available (assuming on the same line)
+      local clen  = c1 - c0
+      local ntext = gtext(node)
 
-      if text then
+      text = text and text or ntext
+      text = string.sub(text, 1, clen)
+      local pad_amt = clen - h.slen(text)
+      text = h.center_pad(text, pad_amt)
 
-        -- Length of the space available (assuming on the same line)
-        local clen  = c1 - c0
-        local ntext = gtext(node)
-
-        text = text and text or ntext
-        text = string.sub(text, 1, clen)
-        local pad_amt = clen - h.slen(text)
-        text = h.center_pad(text, pad_amt)
-
-        local opts = {
-          end_col = c1,
-          virt_text = {{text, "Conceal"}},
-          virt_text_pos = "overlay",
-          virt_text_hide = true,
-        }
-        M.info.ids[count] = vim.api.nvim_buf_set_extmark(M.info.bufnr, M.info.ns, l0, c0, opts)
-
-      end
+      local opts = {
+        end_col = c1,
+        virt_text = {{text, "Conceal"}},
+        virt_text_pos = "overlay",
+        virt_text_hide = true,
+      }
+      M.info.ids[count] = vim.api.nvim_buf_set_extmark(M.info.bufnr, M.info.ns, l0, c0, opts)
 
     end
   end
