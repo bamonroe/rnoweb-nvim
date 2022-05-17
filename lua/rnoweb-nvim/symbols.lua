@@ -9,11 +9,11 @@ _lang = {
 }
 
 M._lang.latex.queries = {
-  cmd = "(generic_command (command_name) @cmd)",
+  replace = "(generic_command (command_name) @cmd)",
 }
 
 M._lang.rnoweb.queries = {
-  cmd = "(rinline (command_name) @cmd)",
+  replace = "(rinline (command_name) @cmd)",
 }
 
 -- Not many rnoweb queies available
@@ -110,10 +110,16 @@ end
 M.queries = function(root, bufnr)
   local lt = M._lang
   local out = {}
-  for k, _ in pairs(lt) do
-    if lt[k].queries ~= nil then
-      local query = q.parse_query(k, lt[k].queries["cmd"])
-      out[k] = query:iter_captures(root, bufnr)
+  for lang, _ in pairs(lt) do
+    if lt[lang].queries ~= nil then
+      for name, query in pairs(lt[lang].queries) do
+        query = q.parse_query(lang, query)
+        out[#out+1] = {
+          cmd   = name,
+          lang  = lang,
+          query = query:iter_captures(root, bufnr)
+        }
+      end
     end
   end
   return pairs(out)

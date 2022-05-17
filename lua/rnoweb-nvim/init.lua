@@ -7,14 +7,6 @@ local info = require'rnoweb-nvim.info'
 
 local q    = vim.treesitter.query
 
-local function gtext(node)
-  local l0, c0, l1, c1 = node:range()
-  local lines = vim.api.nvim_buf_get_lines(info.bufnr, l0, l1 + 1, false)
-  local out = lines[1]
-  out = string.sub(out, c0 + 1, c1)
-  return(out)
-end
-
 M.del_marks = function()
   local v = vim.api
   for _, val in pairs(info.ids) do
@@ -43,7 +35,7 @@ M.mask_inline = function()
       local text = h.read_lines(fname)[1]
       -- Length of the space available (assuming on the same line)
       local clen  = c1 - c0
-      local ntext = gtext(node)
+      local ntext = h.gtext(node)
 
       text = text and text or ntext
       text = string.sub(text, 1, clen)
@@ -69,12 +61,12 @@ M.mask_texsym = function()
   parser:for_each_tree(function(_, tree)
     local ttree = tree:parse()
     local root  = ttree[1]:root()
-    for lang, query in sym.queries(root, info.bufnr) do
+    for _, d in sym.queries(root, info.bufnr) do
+      local lang  = d["lang"]
+      local query = d["query"]
+      local cmd   = d["cmd"]
       for _, node, _ in query do
-        local cmd = gtext(node)
-        if sym.get(lang, cmd) then
-          nh.cmd(lang, node, cmd)
-        end
+        nh[cmd](lang, node)
       end
     end
   end)
@@ -93,7 +85,7 @@ M.make_spell = function()
     local ttree = tree:parse()
     local root  = ttree[1]:root()
     for _, node, _ in author:iter_captures(root, info.bufnr) do
-      local txt = gtext(node)
+      local txt = h.gtext(node)
       txt = string.sub(txt, 2)
       cmds[txt] = 1
     end
