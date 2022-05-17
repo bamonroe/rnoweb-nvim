@@ -66,12 +66,12 @@ M.mask_inline = function()
   end
 end
 
-local function conceal_symbol(node, cmd)
+local function conceal_symbol(lang, node, cmd)
 
   local l0, c0, _, c1 = node:range()
   local clen  = c1 - c0
 
-  local text = sym.get(cmd)
+  local text = sym.get(lang, cmd)
   text = string.sub(text, 1, clen)
   local pad_amt = clen - h.slen(text)
 
@@ -89,15 +89,16 @@ end
 M.mask_texsym = function()
 
   local parser = vim.treesitter.get_parser(M.info.bufnr)
-  local cmd_q = q.parse_query("latex", "(generic_command (command_name) @cmd)")
 
   parser:for_each_tree(function(_, tree)
     local ttree = tree:parse()
     local root  = ttree[1]:root()
-    for _, node, _ in cmd_q:iter_captures(root, M.info.bufnr) do
-      local cmd = gtext(node)
-      if sym.map[cmd] then
-        conceal_symbol(node, cmd)
+    for lang, query in sym.queries(root, M.info.bufnr) do
+      for _, node, _ in query do
+        local cmd = gtext(node)
+        if sym.get(lang, cmd) then
+          conceal_symbol(lang, node, cmd)
+        end
       end
     end
   end)

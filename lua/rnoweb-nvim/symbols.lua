@@ -1,100 +1,120 @@
+local q  = vim.treesitter.query
 
-M = {}
+M = {
+_lang = {
+    r      = {sym = {}},
+    latex  = {sym = {}},
+    rnoweb = {sym = {}}
+  }
+}
 
-M.sym = {}
-M.sym['\\alpha']    = "α"
-M.sym['\\beta']     = "β"
-M.sym["\\delta"]    = "δ"
-M.sym["\\chi"]      = "χ"
-M.sym['\\eta']      = "η"
-M.sym['\\epsilon']  = "ε"
-M.sym["\\gamma"]    = "γ"
-M.sym["\\iota"]     = "ι"
-M.sym["\\kappa"]    = "κ"
-M.sym['\\lambda']   = "λ"
-M.sym['\\mu']       = "μ"
-M.sym['\\nu']       = "ν"
-M.sym['\\omicron']  = "ο"
-M.sym['\\omega']    = "ω"
-M.sym['\\phi']      = "φ"
-M.sym['\\pi']       = "π"
-M.sym['\\psi']      = "ψ"
-M.sym['\\rho']      = "ρ"
-M.sym['\\sigma']    = "σ"
-M.sym['\\tau']      = "τ"
-M.sym["\\theta"]    = "θ"
-M.sym["\\upsilon"]  = "υ"
-M.sym['\\varsigma'] = "ς"
-M.sym['\\xi']       = "ξ"
-M.sym['\\zeta']     = "ζ"
+M._lang.latex.queries = {
+  "(generic_command (command_name) @cmd)"
+}
 
-M.sym['\\Delta']      = "Δ"
-M.sym['\\Gamma']      = "Γ"
-M.sym['\\Theta']      = "Θ"
-M.sym['\\Lambda']     = "Λ"
-M.sym['\\Omega']      = "Ω"
-M.sym['\\Phi']        = "Φ"
-M.sym['\\Pi']         = "Π"
-M.sym['\\Psi']        = "Ψ"
-M.sym['\\Sigma']      = "Σ"
+M._lang.rnoweb.queries = {
+  "(rinline (command_name) @cmd)"
+}
+
+-- Not many rnoweb queies available
+M._lang.rnoweb.sym["\\Sexpr"]  = "ﳒ"
+
+M._lang.latex.sym['\\alpha']    = "α"
+M._lang.latex.sym['\\beta']     = "β"
+M._lang.latex.sym["\\delta"]    = "δ"
+M._lang.latex.sym["\\chi"]      = "χ"
+M._lang.latex.sym['\\eta']      = "η"
+M._lang.latex.sym['\\epsilon']  = "ε"
+M._lang.latex.sym["\\gamma"]    = "γ"
+M._lang.latex.sym["\\iota"]     = "ι"
+M._lang.latex.sym["\\kappa"]    = "κ"
+M._lang.latex.sym['\\lambda']   = "λ"
+M._lang.latex.sym['\\mu']       = "μ"
+M._lang.latex.sym['\\nu']       = "ν"
+M._lang.latex.sym['\\omicron']  = "ο"
+M._lang.latex.sym['\\omega']    = "ω"
+M._lang.latex.sym['\\phi']      = "φ"
+M._lang.latex.sym['\\pi']       = "π"
+M._lang.latex.sym['\\psi']      = "ψ"
+M._lang.latex.sym['\\rho']      = "ρ"
+M._lang.latex.sym['\\sigma']    = "σ"
+M._lang.latex.sym['\\tau']      = "τ"
+M._lang.latex.sym["\\theta"]    = "θ"
+M._lang.latex.sym["\\upsilon"]  = "υ"
+M._lang.latex.sym['\\varsigma'] = "ς"
+M._lang.latex.sym['\\xi']       = "ξ"
+M._lang.latex.sym['\\zeta']     = "ζ"
+
+M._lang.latex.sym['\\Delta']  = "Δ"
+M._lang.latex.sym['\\Gamma']  = "Γ"
+M._lang.latex.sym['\\Theta']  = "Θ"
+M._lang.latex.sym['\\Lambda'] = "Λ"
+M._lang.latex.sym['\\Omega']  = "Ω"
+M._lang.latex.sym['\\Phi']    = "Φ"
+M._lang.latex.sym['\\Pi']     = "Π"
+M._lang.latex.sym['\\Psi']    = "Ψ"
+M._lang.latex.sym['\\Sigma']  = "Σ"
 
 -- Math things
-M.sym['\\infty']       = "∞"
-M.sym['\\times']       = ""
-M.sym['\\geq']         = "≥"
-M.sym['\\leq']         = "≤"
-M.sym['\\approx']      = "≈"
-M.sym['\\propto']      = "∝"
-M.sym['\\sim']         = "∼"
-M.sym['\\succcurlyeq'] = "≽"
-M.sym['\\preccurlyeq'] = "≼"
-M.sym['\\succ']        = "≻"
-M.sym['\\prec']        = "≺"
-M.sym['\\int']         = "∫"
-M.sym['\\sum']         = "∑"
-M.sym['\\ln']          = " ln"
-M.sym['\\exp']         = "   e"
-M.sym['\\in']          = "Є"
-M.sym['\\lbrace']      = "{"
-M.sym['\\rbrace']      = "}"
+M._lang.latex.sym['\\infty']       = "∞"
+M._lang.latex.sym['\\times']       = ""
+M._lang.latex.sym['\\geq']         = "≥"
+M._lang.latex.sym['\\leq']         = "≤"
+M._lang.latex.sym['\\approx']      = "≈"
+M._lang.latex.sym['\\propto']      = "∝"
+M._lang.latex.sym['\\sim']         = "∼"
+M._lang.latex.sym['\\succcurlyeq'] = "≽"
+M._lang.latex.sym['\\preccurlyeq'] = "≼"
+M._lang.latex.sym['\\succ']        = "≻"
+M._lang.latex.sym['\\prec']        = "≺"
+M._lang.latex.sym['\\int']         = "∫"
+M._lang.latex.sym['\\sum']         = "∑"
+M._lang.latex.sym['\\ln']          = " ln"
+M._lang.latex.sym['\\exp']         = "   e"
+M._lang.latex.sym['\\in']          = "Є"
+M._lang.latex.sym['\\lbrace']      = "{"
+M._lang.latex.sym['\\rbrace']      = "}"
 
 -- Non-greeks
-M.sym['\\cdot']        = "•"
-M.sym['\\footnote']    = "*"
+M._lang.latex.sym['\\cdot']        = "•"
+M._lang.latex.sym['\\footnote']    = "*"
 
 -- Just remove some things
-M.sym['\\noindent']  = ""
-M.sym['\\textit']    = ""
-M.sym['\\mathit']    = ""
-M.sym['\\quad']      = ""
-M.sym['\\;']         = ""
-M.sym['\\!']         = ""
-M.sym['\\textcite']  = ""
-M.sym['\\parencite'] = ""
-M.sym['\\left']  = ""
-M.sym['\\right'] = ""
+M._lang.latex.sym['\\noindent']  = ""
+M._lang.latex.sym['\\textit']    = ""
+M._lang.latex.sym['\\mathit']    = ""
+M._lang.latex.sym['\\quad']      = ""
+M._lang.latex.sym['\\;']         = ""
+M._lang.latex.sym['\\!']         = ""
+M._lang.latex.sym['\\textcite']  = ""
+M._lang.latex.sym['\\parencite'] = ""
+M._lang.latex.sym['\\left']      = ""
+M._lang.latex.sym['\\right']     = ""
 
--- Same map for underscored text
-for k, _ in pairs(M.sym) do
-  M.sym[k .. "_"] = M.sym[k] .. "_"
+-- Latex mappings can also include the underscored
+for k, _ in pairs(M._lang.latex.sym) do
+  M._lang.latex.sym[k .. "_"] = M._lang.latex.sym[k] .. "_"
 end
 
--- Make a map that points to the keys of sym
-M.map = {}
-for k, _ in pairs(M.sym) do
-
-  M.map[k]         = k
-  -- Map underscored chars to the same keys
-  --M.map[k .. "_" ] = k
+M.get = function(l, m)
+  local lt = M._lang
+  if lt[l].sym ~= nil then
+    return M._lang[l].sym[m]
+  else
+    return nil
+  end
 end
 
--- Some left/right commands
---M.sym['\\left\\lbrace']  = "\\lbrace"
---M.sym['\\right\\rbrace'] = "\\rbrace"
-
-
-M.get = function(m)
-  return M.sym[M.map[m]]
+M.queries = function(root, bufnr)
+  local lt = M._lang
+  local out = {}
+  for k, _ in pairs(lt) do
+    if lt[k].queries ~= nil then
+      local query = q.parse_query(k, lt[k].queries[1])
+      out[k] = query:iter_captures(root, bufnr)
+    end
+  end
+  return pairs(out)
 end
 
 
