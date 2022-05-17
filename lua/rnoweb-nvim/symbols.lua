@@ -1,6 +1,6 @@
 local q  = vim.treesitter.query
 
-M = {
+local M = {
 _lang = {
     r      = {sym = {}},
     latex  = {sym = {}},
@@ -9,16 +9,18 @@ _lang = {
 }
 
 M._lang.latex.queries = {
-  "(generic_command (command_name) @cmd)"
+  cmd = "(generic_command (command_name) @cmd)",
 }
 
 M._lang.rnoweb.queries = {
-  "(rinline (command_name) @cmd)"
+  cmd = "(rinline (command_name) @cmd)",
 }
 
 -- Not many rnoweb queies available
 M._lang.rnoweb.sym["\\Sexpr"]  = "ﳒ"
 
+-- Lots of latex replacements
+-- Start with the greeks
 M._lang.latex.sym['\\alpha']    = "α"
 M._lang.latex.sym['\\beta']     = "β"
 M._lang.latex.sym["\\delta"]    = "δ"
@@ -110,7 +112,7 @@ M.queries = function(root, bufnr)
   local out = {}
   for k, _ in pairs(lt) do
     if lt[k].queries ~= nil then
-      local query = q.parse_query(k, lt[k].queries[1])
+      local query = q.parse_query(k, lt[k].queries["cmd"])
       out[k] = query:iter_captures(root, bufnr)
     end
   end
