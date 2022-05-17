@@ -9,7 +9,8 @@ _lang = {
 }
 
 M._lang.latex.queries = {
-  replace = "(generic_command (command_name) @cmd)",
+  replace  = "(generic_command (command_name) @cmd)",
+  citation = "(citation) @cite",
 }
 
 M._lang.rnoweb.queries = {

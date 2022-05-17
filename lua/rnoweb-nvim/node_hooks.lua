@@ -1,3 +1,4 @@
+local q  = vim.treesitter.query
 local sym  = require'rnoweb-nvim.symbols'
 local h    = require'rnoweb-nvim.helpers'
 local info = require'rnoweb-nvim.info'
@@ -33,6 +34,72 @@ M.replace = function(lang, node)
   end
 
   info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(info.bufnr, info.ns, l0, c0, opts)
+end
+
+local author_year = function(a)
+  local out = {}
+  for _, v in pairs(a) do
+    local author = v:match('^([^%d]+)%d+')
+    local year   = v:match('^[^%d]+(%d+)')
+    out[#out+1] = {
+      author = author,
+      year = year,
+    }
+  end
+  return(out)
+end
+
+M.citation = function(lang, node)
+
+  local l0, c0, _, c1 = node:range()
+
+  -- I don't know why there seems to be a problem with column 0 marks
+  c0 = c0 == 0 and 1 or c0
+
+  local clen  = c1 - c0
+  local text = h.gtext(node)
+
+  local is_paren = text:match("^\\parencite") and true or false
+  local query = "(curly_group_text_list (text) @keys )"
+  local kq = q.parse_query(lang, query)
+
+  local keys = {}
+  for _, v in kq:iter_captures(node, info.bufnr) do
+    local k = h.gtext(v)
+    keys[#keys+1] = k
+  end
+
+  keys = author_year(keys)
+
+  local display = ""
+  if is_paren then
+    display = "("
+    local lkeys = #keys
+    for _, v in pairs(keys) do
+      lkeys = lkeys - 1
+      display = display .. v["author"] .. " " .. v["year"] .. (lkeys > 0 and ", " or "")
+    end
+    display = display .. ")"
+  else
+    local lkeys = #keys
+    for _, v in pairs(keys) do
+      lkeys = lkeys - 1
+      display = display .. v["author"] .. " (" .. v["year"] .. ")" .. (lkeys > 0 and ", " or "")
+    end
+  end
+
+  local tlen = h.slen(display)
+  local pad_amt = clen - tlen
+  local ptext = h.center_pad(display, pad_amt)
+
+  local opts = {
+    end_col = c1,
+    virt_text = {{ptext, "TSTextReference"}},
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+  }
+  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(info.bufnr, info.ns, l0, c0, opts)
+
 end
 
 return M
