@@ -59,9 +59,13 @@ M.citation = function(lang, node)
   local clen  = c1 - c0
   local text = h.gtext(node)
 
+  -- Is this a parencite?
   local is_paren = text:match("^\\parencite") and true or false
-  local query = "(curly_group_text_list (text) @keys )"
-  local kq = q.parse_query(lang, query)
+
+  -- The query for the author
+  local kq = q.parse_query(lang, "(curly_group_text_list (text) @keys )")
+  -- The query for any pre-notes
+  local pq = q.parse_query(lang, "(brack_group (text) @prenote )")
 
   local keys = {}
   for _, v in kq:iter_captures(node, info.bufnr) do
@@ -71,20 +75,36 @@ M.citation = function(lang, node)
 
   keys = author_year(keys)
 
+  -- Some citations will have a prenote
+  local counter = 0
+  for _, v in pq:iter_captures(node, info.bufnr) do
+    counter = counter + 1
+    keys[counter].pn = h.gtext(v)
+  end
+
+  for k, _ in pairs(keys) do
+    keys[k].pn = keys[k].pn == nil and "" or ", p." .. keys[k].pn
+  end
+
+  vim.pretty_print(keys)
+
   local display = ""
   if is_paren then
     display = "("
     local lkeys = #keys
     for _, v in pairs(keys) do
       lkeys = lkeys - 1
-      display = display .. v["author"] .. " " .. v["year"] .. (lkeys > 0 and ", " or "")
+      display = display .. v["author"] .. " " .. v["year"] .. v["pn"] .. (lkeys > 0 and ", " or "")
     end
     display = display .. ")"
   else
     local lkeys = #keys
     for _, v in pairs(keys) do
       lkeys = lkeys - 1
-      display = display .. v["author"] .. " (" .. v["year"] .. ")" .. (lkeys > 0 and ", " or "")
+      display = display .. v["author"] ..
+        " (" .. v["year"] ..
+        v["pn"] ..
+        ")" .. (lkeys > 0 and ", " or "")
     end
   end
 
