@@ -11,6 +11,7 @@ _lang = {
 M._lang.latex.queries = {
   replace  = "(generic_command (command_name) @cmd)",
   citation = "(citation) @cite",
+  curly_cmd  = '(generic_command (command_name) (curly_group)) @f',
 }
 
 M._lang.rnoweb.queries = {
@@ -59,24 +60,25 @@ M._lang.latex.sym['\\Psi']    = "Ψ"
 M._lang.latex.sym['\\Sigma']  = "Σ"
 
 -- Math things
-M._lang.latex.sym['\\infty']       = "∞"
-M._lang.latex.sym['\\times']       = ""
-M._lang.latex.sym['\\geq']         = "≥"
-M._lang.latex.sym['\\leq']         = "≤"
-M._lang.latex.sym['\\approx']      = "≈"
-M._lang.latex.sym['\\propto']      = "∝"
-M._lang.latex.sym['\\sim']         = "∼"
-M._lang.latex.sym['\\succcurlyeq'] = "≽"
-M._lang.latex.sym['\\preccurlyeq'] = "≼"
-M._lang.latex.sym['\\succ']        = "≻"
-M._lang.latex.sym['\\prec']        = "≺"
-M._lang.latex.sym['\\int']         = "∫"
-M._lang.latex.sym['\\sum']         = "∑"
-M._lang.latex.sym['\\ln']          = " ln"
-M._lang.latex.sym['\\exp']         = "   e"
-M._lang.latex.sym['\\in']          = "Є"
-M._lang.latex.sym['\\lbrace']      = "{"
-M._lang.latex.sym['\\rbrace']      = "}"
+M._lang.latex.sym['\\infty']          = "∞"
+M._lang.latex.sym['\\times']          = ""
+M._lang.latex.sym['\\geq']            = "≥"
+M._lang.latex.sym['\\leq']            = "≤"
+M._lang.latex.sym['\\approx']         = "≈"
+M._lang.latex.sym['\\propto']         = "∝"
+M._lang.latex.sym['\\sim']            = "∼"
+M._lang.latex.sym['\\succcurlyeq']    = "≽"
+M._lang.latex.sym['\\preccurlyeq']    = "≼"
+M._lang.latex.sym['\\succ']           = "≻"
+M._lang.latex.sym['\\prec']           = "≺"
+M._lang.latex.sym['\\int']            = "∫"
+M._lang.latex.sym['\\sum']            = "∑"
+M._lang.latex.sym['\\ln']             = " ln"
+M._lang.latex.sym['\\exp']            = "   e"
+M._lang.latex.sym['\\in']             = "Є"
+M._lang.latex.sym['\\lbrace']         = "{"
+M._lang.latex.sym['\\rbrace']         = "}"
+M._lang.latex.sym['\\Leftrightarrow'] = "🡘 "
 
 -- Non-greeks
 M._lang.latex.sym['\\cdot']        = "•"
@@ -84,8 +86,6 @@ M._lang.latex.sym['\\footnote']    = "*"
 
 -- Just remove some things
 M._lang.latex.sym['\\noindent']  = ""
-M._lang.latex.sym['\\textit']    = ""
-M._lang.latex.sym['\\mathit']    = ""
 M._lang.latex.sym['\\quad']      = ""
 M._lang.latex.sym['\\;']         = ""
 M._lang.latex.sym['\\!']         = ""
