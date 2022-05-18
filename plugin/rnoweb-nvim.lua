@@ -1,3 +1,4 @@
+--[[
 vim.keymap.set('n', "<F5>", function()
   require('plenary.reload').reload_module("rnoweb-nvim")
   --vim.cmd("source /home/bam/git/v_dev/rnoweb.nvim/main.lua")
@@ -18,3 +19,4 @@ end)
 vim.keymap.set('n', "<leader>s", function()
   require('rnoweb-nvim').make_spell()
 end)
+--]]
