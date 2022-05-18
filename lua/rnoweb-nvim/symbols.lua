@@ -141,10 +141,6 @@ M.sym.latex['\\parencite'] = ""
 M.sym.latex['\\left']      = ""
 M.sym.latex['\\right']     = ""
 
--- My own ideo-syncratic ones, eventually this will go to some user-setting
-M.sym.latex['\\CE'] = "CE"
-M.sym.latex['\\CS'] = "CS"
-
 -- Latex mappings can also include the underscored
 for k, _ in pairs(M.sym.latex) do
   M.sym.latex[k .. "_"] = M.sym.latex[k] .. "_"
@@ -155,6 +151,7 @@ M.set_sym = function(lang, key, sym)
     M.sym[lang] = {}
   end
   M.sym[lang][key] = sym
+  M.sym[lang][key .. "_"] = sym .. "_"
 end
 
 M.get_sym = function(l, m)
@@ -188,6 +185,5 @@ M.get_queries = function(root, bufnr)
   end
   return pairs(out)
 end
-
 
 return M
