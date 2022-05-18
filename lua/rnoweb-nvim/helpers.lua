@@ -49,9 +49,17 @@ M.slen = function(s)
   return count
 end
 
+M.gmatch = function(s)
+  local out = {}
+  for c in s:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    out[#out+1] = c
+  end
+  return out
+end
+
 M.isin = function(v, t)
   local res = false
-  for key, val in pairs(t) do
+  for _, val in pairs(t) do
     if not res then
       res = v == val
     end
@@ -121,8 +129,15 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
     beg_col,
     nopts)
 
+  vim.pretty_print(conceal_text)
+
+  local ct_utf8 = M.gmatch(conceal_text)
+
+  vim.pretty_print(ct_utf8)
+
   for i = 1,conceal_len do
-    local cchar = conceal_text:sub(i,i)
+    local cchar = ct_utf8[i]
+    vim.pretty_print(cchar)
     nopts = {
       end_line = opts["end_line"],
       end_col  = beg_col + padding + i,
@@ -135,7 +150,7 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
       bufnr,
       ns,
       beg_line,
-      beg_col + padding + i,
+      beg_col + padding + i - 1,
       nopts)
   end
 

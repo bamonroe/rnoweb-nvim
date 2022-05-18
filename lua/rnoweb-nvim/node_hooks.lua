@@ -19,22 +19,25 @@ M.replace = function(lang, node)
   local slen = h.slen(text)
   local pad_amt = clen - slen
 
-  local ptext = h.center_pad(text, pad_amt)
+  -- local ptext = h.center_pad(text, pad_amt)
 
   local opts = {
     end_col = c1,
-    virt_text = {{ptext, "Conceal"}},
+    virt_text = {{'', "Conceal"}},
     virt_text_pos = "overlay",
     virt_text_hide = true,
+    conceal = text,
   }
 
-  -- Conceal values where the replacement text is 0 or 1 in char length
-  if slen < 2 then
-    opts["conceal"] = text
-    opts["virt_text"] = {{"", "Conceal"}}
-  end
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    l0,
+    c0,
+    opts,
+    clen
+  )
 
-  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(info.bufnr, info.ns, l0, c0, opts)
 end
 
 local author_year = function(a)
