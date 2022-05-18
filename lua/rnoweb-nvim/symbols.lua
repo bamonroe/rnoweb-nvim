@@ -150,6 +150,13 @@ for k, _ in pairs(M.sym.latex) do
   M.sym.latex[k .. "_"] = M.sym.latex[k] .. "_"
 end
 
+M.set_sym = function(lang, key, sym)
+  if M.sym[lang] == nil then
+    M.sym[lang] = {}
+  end
+  M.sym[lang][key] = sym
+end
+
 M.get_sym = function(l, m)
   local lt = M.sym[l]
   if lt[m] ~= nil then
@@ -157,6 +164,13 @@ M.get_sym = function(l, m)
   else
     return nil
   end
+end
+
+M.set_query = function(lang, key, query)
+  if M.sym[lang] == nil then
+    M.sym[lang] = {}
+  end
+  M.sym[lang][key] = query
 end
 
 M.get_queries = function(root, bufnr)
