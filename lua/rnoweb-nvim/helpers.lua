@@ -98,4 +98,47 @@ M.gtext = function(node)
   return(out)
 end
 
+M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
+
+  local conceal_text = opts["conceal"]
+  local conceal_len  = M.slen(conceal_text)
+
+  local padding = node_len - conceal_len
+
+  -- Firstly, conceal the padding
+  local nopts = {
+    end_line = opts["end_line"],
+    end_col  = beg_col + padding,
+    virt_text = {{'', "Conceal"}},
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = '',
+  }
+  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
+    bufnr,
+    ns,
+    beg_line,
+    beg_col,
+    nopts)
+
+  for i = 1,conceal_len do
+    local cchar = conceal_text:sub(i,i)
+    nopts = {
+      end_line = opts["end_line"],
+      end_col  = beg_col + padding + i,
+      virt_text = {{'', "Conceal"}},
+      virt_text_pos = "overlay",
+      virt_text_hide = true,
+      conceal = cchar,
+    }
+    info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
+      bufnr,
+      ns,
+      beg_line,
+      beg_col + padding + i,
+      nopts)
+  end
+
+end
+
 return M

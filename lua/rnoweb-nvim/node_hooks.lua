@@ -133,7 +133,7 @@ local conceal_curly = function(lang, node, cmd)
   local arg_node  = node:field("arg")[1]
   local arg_range = {arg_node:range()}
 
-  -- Opening quote
+  -- Opening symbol
   local opts = {
     end_line = arg_range[1],
     end_col  = arg_range[2] + 1,
@@ -150,7 +150,7 @@ local conceal_curly = function(lang, node, cmd)
     node_range[2],
     opts)
 
-  -- Closing Quote
+  -- Closing symbol
   opts = {
     end_line = arg_range[3],
     end_col  = arg_range[4],
