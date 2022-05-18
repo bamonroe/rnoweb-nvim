@@ -57,9 +57,6 @@ M.citation = function(lang, node)
 
   local l0, c0, _, c1 = node:range()
 
-  -- I don't know why there seems to be a problem with column 0 marks
-  c0 = c0 == 0 and 1 or c0
-
   local clen  = c1 - c0
   local text = h.gtext(node)
 
@@ -116,12 +113,20 @@ M.citation = function(lang, node)
 
   local opts = {
     end_col = c1,
-    virt_text = {{ptext, "TSTextReference"}},
+    hl_group = "TSTextReference",
     virt_text_pos = "overlay",
     virt_text_hide = true,
+    conceal = display
   }
-  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(info.bufnr, info.ns, l0, c0, opts)
 
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    l0,
+    c0,
+    opts,
+    clen
+  )
 end
 
 local conceal_curly = function(lang, node, cmd)
@@ -175,6 +180,7 @@ end
 M.curly_cmd_pairs = {}
 M.curly_cmd_pairs["\\enquote"]  = {left = "“", right = "”"}
 M.curly_cmd_pairs["\\textelp"]  = {left = "…", right = ""}
+M.curly_cmd_pairs["\\textins"]  = {left = "[", right = "]"}
 M.curly_cmd_pairs["\\textit"]   = {left = "",  right = ""}
 M.curly_cmd_pairs["\\mathit"]   = {left = "",  right = ""}
 M.curly_cmd_pairs["\\text"]     = {left = "",  right = ""}

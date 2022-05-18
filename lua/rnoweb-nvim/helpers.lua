@@ -144,6 +144,7 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
       virt_text = {{'', "Conceal"}},
       virt_text_pos = "overlay",
       virt_text_hide = true,
+      hl_group = opts["hl_group"],
       conceal = cchar,
     }
     info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
