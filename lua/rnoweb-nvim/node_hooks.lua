@@ -12,7 +12,7 @@ M.replace = function(lang, node)
   local clen  = c1 - c0
   local cmd = h.gtext(node)
 
-  local text = sym.get(lang, cmd)
+  local text = sym.get_sym(lang, cmd)
   if text == nil then return(nil) end
 
   text = string.sub(text, 1, clen)

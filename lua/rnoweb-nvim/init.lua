@@ -77,7 +77,7 @@ M.mask_texsym = function()
   parser:for_each_tree(function(_, tree)
     local ttree = tree:parse()
     local root  = ttree[1]:root()
-    for _, d in sym.queries(root, info.bufnr) do
+    for _, d in sym.get_queries(root, info.bufnr) do
       local lang  = d["lang"]
       local query = d["query"]
       local cmd   = d["cmd"]
