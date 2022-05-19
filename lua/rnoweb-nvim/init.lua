@@ -40,15 +40,6 @@ M.mask_inline = function()
       text = text and text or ntext
       text = string.sub(text, 1, clen)
       local pad_amt = clen - h.slen(text)
-      --text = h.center_pad(text, pad_amt)
-
-      --local opts = {
-      --  end_col = c1,
-      --  virt_text = {{text, "Conceal"}},
-      --  virt_text_pos = "overlay",
-      --  virt_text_hide = true,
-      --}
-      --info.ids[count] = vim.api.nvim_buf_set_extmark(info.bufnr, info.ns, l0, c0, opts)
 
       local opts = {
         end_col = c1,

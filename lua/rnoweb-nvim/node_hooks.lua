@@ -177,114 +177,102 @@ local conceal_curly = function(lang, node, cmd)
 
 end
 
-local two_arg = function(lang, node, cmd_name)
+local conceal_cmd_fn = function(lang, node, cmd_name)
 
   -- Full range of the node
   local node_range = {node:range()}
-
-  -- The range of the arg node
+  -- Get the table of arg nodes
   local arg_nodes  = node:field("arg")
+  -- Number of argument groups
+  local nargs = #arg_nodes
 
-  local arg1 = arg_nodes[1]
-  local arg2 = arg_nodes[2]
+  -- Get the table of ranges for args
+  local arg_ranges = {}
+  if nargs > 0 then
+    for i = 1,nargs do
+      arg_ranges[#arg_ranges+1] = {arg_nodes[i]:range()}
+    end
+  end
 
-  local arg1_range = {arg1:range()}
-  local arg2_range = {arg2:range()}
+  -- We always start at the beginning of the main node
+  local beg_line = node_range[1]
+  local beg_col  = node_range[2]
+
+  local end_line
+  local end_col
+
+  if nargs == 0 then
+    end_line = node_range[3]
+    end_col  = node_range[4]
+  else
+    end_line = node_range[3]
+    end_col  = node_range[4]
+  end
+
+  local clen = end_col - beg_col
 
   -- Opening symbol
   local opts = {
-    end_col = arg1_range[2] + 1,
-    end_line = arg1_range[1],
+    end_col = end_line,
+    end_line = end_col,
     virt_text_pos = "overlay",
     virt_text_hide = true,
-    conceal = M.curly_cmd_pairs[cmd_name]["left"],
+    conceal = sym.sym[lang][cmd_name][1]
   }
-
-  local clen = (arg1_range[2] + 1) - node_range[2]
 
   h.mc_conceal(
     info.bufnr,
     info.ns,
-    node_range[1],
-    node_range[2],
+    beg_line,
+    beg_col,
     opts,
     clen
   )
 
-  -- Middle symbol
-  opts = {
-    end_col = arg2_range[2] + 1,
-    end_line = arg2_range[1],
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = M.curly_cmd_pairs[cmd_name]["middle"],
-  }
+  -- Loop through the args, applying conceals in order
+  beg_line = node_range[1]
+  beg_col  = node_range[2]
 
-  clen = (arg2_range[2] + 1) - arg1_range[4]
+  for i = 1,nargs do
 
-  h.mc_conceal(
-    info.bufnr,
-    info.ns,
-    arg1_range[3],
-    arg1_range[4],
-    opts,
-    clen
-  )
+    beg_line = arg_ranges[i][3]
+    beg_col  = arg_ranges[i][4]
+    end_line = i < nargs and arg_ranges[i + 1][3] or arg_ranges[i + 1][3]
+    end_col  = i < nargs and arg_ranges[i + 1][4] + 1  or arg_ranges[i + 1][4]
 
-  -- Middle symbol
-  opts = {
-    end_col = arg2_range[4],
-    end_line = arg2_range[1],
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = M.curly_cmd_pairs[cmd_name]["right"],
-  }
+    -- Opening symbol
+    opts = {
+      end_col = end_col,
+      end_line = end_line,
+      virt_text_pos = "overlay",
+      virt_text_hide = true,
+      conceal = sym.sym[lang][cmd_name][i + 1]
+    }
 
-  clen = 1
+    clen = end_col - beg_col
 
-  h.mc_conceal(
-    info.bufnr,
-    info.ns,
-    arg2_range[3],
-    arg2_range[4] - 1,
-    opts,
-    clen
-  )
+    h.mc_conceal(
+      info.bufnr,
+      info.ns,
+      beg_line,
+      beg_col,
+      opts,
+      clen
+    )
+  end
+
 end
 
-M.curly_cmd_pairs = {}
-M.curly_cmd_pairs["\\enquote"]  = {left = "“", right = "”"}
-M.curly_cmd_pairs["\\textelp"]  = {left = "…", right = ""}
-M.curly_cmd_pairs["\\textins"]  = {left = "[", right = "]"}
-M.curly_cmd_pairs["\\textit"]   = {left = "",  right = ""}
-M.curly_cmd_pairs["\\mathit"]   = {left = "",  right = ""}
-M.curly_cmd_pairs["\\text"]     = {left = "",  right = ""}
-M.curly_cmd_pairs["\\frac"]     = {left = "",  middle = " ⁄", right = ""}
-M.curly_cmd_pairs["\\nicefrac"] = {left = "",  middle = " ⁄", right = ""}
-M.curly_cmd_pairs["\\dfrac"]    = {left = "",  middle = " ⁄", right = ""}
-M.curly_cmd_pairs["\\gbar"]     = {left = "(",  middle = " |", right = ")"}
-M.curly_cmd_pairs["\\gbar*"]    = {left = "",  middle = " |", right = ""}
+M.conceal_cmd = function(lang, node)
 
-local cmd_fn = {}
-cmd_fn["\\enquote"] = conceal_curly
-cmd_fn["\\textelp"] = conceal_curly
-cmd_fn["\\textins"] = conceal_curly
-cmd_fn["\\textit"]  = conceal_curly
-cmd_fn["\\mathit"]  = conceal_curly
-cmd_fn["\\text"]    = conceal_curly
-cmd_fn["\\frac"]    = two_arg
-cmd_fn["\\nicefrac"]    = two_arg
-cmd_fn["\\dfrac"]    = two_arg
-cmd_fn["\\gbar"]    = two_arg
-cmd_fn["\\gbar*"]    = two_arg
+  vim.pretty_print(h.gtext(node))
+  local cmd_node = node:field("command")
+  cmd_node = cmd_node[1]
+  if cmd_node == nil then return nil end
 
-M.curly_cmd = function(lang, node)
-  local cmd_node = node:field("command")[1]
   local cmd_name = ts.get_node_text(cmd_node, info.bufnr)
-  if cmd_fn[cmd_name] ~= nil then
-    cmd_fn[cmd_name](lang, node, cmd_name)
-  else
-    return nil
+  if sym.sym[lang][cmd_name] ~= nil then
+    conceal_cmd_fn(lang, node, cmd_name)
   end
 end
 
