@@ -129,62 +129,21 @@ M.citation = function(lang, node)
   )
 end
 
-local conceal_curly = function(lang, node, cmd)
-
-  local left  = M.curly_cmd_pairs[cmd]["left"]
-  local right = M.curly_cmd_pairs[cmd]["right"]
-
-  -- Full range of the node
-  local node_range = {node:range()}
-
-  -- The range of the arg node
-  local arg_node  = node:field("arg")[1]
-  local arg_range = {arg_node:range()}
-
-  -- Opening symbol
-  local opts = {
-    end_line = arg_range[1],
-    end_col  = arg_range[2] + 1,
-    virt_text = {{"", "Conceal"}},
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = left,
-  }
-
-  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
-    info.bufnr,
-    info.ns,
-    node_range[1],
-    node_range[2],
-    opts)
-
-  -- Closing symbol
-  opts = {
-    end_line = arg_range[3],
-    end_col  = arg_range[4],
-    virt_text = {{"", "Conceal"}},
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = right,
-  }
-
-  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
-    info.bufnr,
-    info.ns,
-    arg_range[3],
-    arg_range[4] - 1,
-    opts)
-
-end
-
 local conceal_cmd_fn = function(lang, node, cmd_name)
 
   -- Full range of the node
   local node_range = {node:range()}
+  -- Node for the command name
+  local cmd_node  = node:field("command")
+  -- Rang of the command name
+  local cmd_range = {cmd_node[1]:range()}
   -- Get the table of arg nodes
   local arg_nodes  = node:field("arg")
   -- Number of argument groups
   local nargs = #arg_nodes
+
+  local text = sym.sym[lang][cmd_name]
+  local ntext = #text
 
   -- Get the table of ranges for args
   local arg_ranges = {}
@@ -201,23 +160,26 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
   local end_line
   local end_col
 
-  if nargs == 0 then
-    end_line = node_range[3]
-    end_col  = node_range[4]
+  if nargs == 0 or ntext == 1 then
+    end_line = cmd_range[3]
+    end_col  = cmd_range[4]
   else
-    end_line = node_range[3]
-    end_col  = node_range[4]
+    end_line = arg_ranges[1][1]
+    end_col  = arg_ranges[1][2]
   end
 
   local clen = end_col - beg_col
 
+  vim.pretty_print("here0")
+  vim.pretty_print({beg_line, beg_col, end_line, end_col})
+
   -- Opening symbol
   local opts = {
-    end_col = end_line,
-    end_line = end_col,
+    end_col = end_col,
+    end_line = end_line,
     virt_text_pos = "overlay",
     virt_text_hide = true,
-    conceal = sym.sym[lang][cmd_name][1]
+    conceal = text[1]
   }
 
   h.mc_conceal(
@@ -229,16 +191,33 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
     clen
   )
 
+  if ntext == 1 then
+    return(nil)
+  end
+
+  vim.pretty_print("here1")
   -- Loop through the args, applying conceals in order
   beg_line = node_range[1]
   beg_col  = node_range[2]
 
   for i = 1,nargs do
 
+    vim.pretty_print("i is " .. i)
     beg_line = arg_ranges[i][3]
     beg_col  = arg_ranges[i][4]
-    end_line = i < nargs and arg_ranges[i + 1][3] or arg_ranges[i + 1][3]
-    end_col  = i < nargs and arg_ranges[i + 1][4] + 1  or arg_ranges[i + 1][4]
+    if i < nargs then
+      end_line = arg_ranges[i + 1][3]
+      end_col  = arg_ranges[i + 1][4]
+    else
+      end_line = arg_ranges[i][3]
+      end_col  = arg_ranges[i][4]
+    end
+
+    vim.pretty_print({beg_line, beg_col, end_line, end_col})
+
+    text = sym.sym[lang][cmd_name][i + 1]
+    local text0 = sym.sym[lang][cmd_name]
+    vim.pretty_print(text0)
 
     -- Opening symbol
     opts = {
@@ -246,7 +225,7 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
       end_line = end_line,
       virt_text_pos = "overlay",
       virt_text_hide = true,
-      conceal = sym.sym[lang][cmd_name][i + 1]
+      conceal = text
     }
 
     clen = end_col - beg_col
@@ -265,7 +244,10 @@ end
 
 M.conceal_cmd = function(lang, node)
 
+
+  vim.pretty_print("----------------------------")
   vim.pretty_print(h.gtext(node))
+
   local cmd_node = node:field("command")
   cmd_node = cmd_node[1]
   if cmd_node == nil then return nil end

@@ -14,7 +14,7 @@ local M = {
 }
 
 M.queries.latex = {
-  conceal_cmd = "(generic_command (command_name) @cmd)",
+  conceal_cmd = "(generic_command (command_name)) @cmd",
   citation    = "(citation) @cite",
 }
 
