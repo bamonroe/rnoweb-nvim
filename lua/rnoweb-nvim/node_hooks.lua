@@ -177,6 +177,81 @@ local conceal_curly = function(lang, node, cmd)
 
 end
 
+local two_arg = function(lang, node, cmd_name)
+
+  -- Full range of the node
+  local node_range = {node:range()}
+
+  -- The range of the arg node
+  local arg_nodes  = node:field("arg")
+
+  local arg1 = arg_nodes[1]
+  local arg2 = arg_nodes[2]
+
+  local arg1_range = {arg1:range()}
+  local arg2_range = {arg2:range()}
+
+  -- Opening symbol
+  local opts = {
+    end_col = arg1_range[2] + 1,
+    end_line = arg1_range[1],
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = M.curly_cmd_pairs[cmd_name]["left"],
+  }
+
+  local clen = (arg1_range[2] + 1) - node_range[2]
+
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    node_range[1],
+    node_range[2],
+    opts,
+    clen
+  )
+
+  -- Middle symbol
+  opts = {
+    end_col = arg2_range[2] + 1,
+    end_line = arg2_range[1],
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = M.curly_cmd_pairs[cmd_name]["middle"],
+  }
+
+  clen = (arg2_range[2] + 1) - arg1_range[4]
+
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    arg1_range[3],
+    arg1_range[4],
+    opts,
+    clen
+  )
+
+  -- Middle symbol
+  opts = {
+    end_col = arg2_range[4],
+    end_line = arg2_range[1],
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = M.curly_cmd_pairs[cmd_name]["right"],
+  }
+
+  clen = 1
+
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    arg2_range[3],
+    arg2_range[4] - 1,
+    opts,
+    clen
+  )
+end
+
 M.curly_cmd_pairs = {}
 M.curly_cmd_pairs["\\enquote"]  = {left = "“", right = "”"}
 M.curly_cmd_pairs["\\textelp"]  = {left = "…", right = ""}
@@ -184,12 +259,30 @@ M.curly_cmd_pairs["\\textins"]  = {left = "[", right = "]"}
 M.curly_cmd_pairs["\\textit"]   = {left = "",  right = ""}
 M.curly_cmd_pairs["\\mathit"]   = {left = "",  right = ""}
 M.curly_cmd_pairs["\\text"]     = {left = "",  right = ""}
+M.curly_cmd_pairs["\\frac"]     = {left = "",  middle = " ⁄", right = ""}
+M.curly_cmd_pairs["\\nicefrac"] = {left = "",  middle = " ⁄", right = ""}
+M.curly_cmd_pairs["\\dfrac"]    = {left = "",  middle = " ⁄", right = ""}
+M.curly_cmd_pairs["\\gbar"]     = {left = "(",  middle = " |", right = ")"}
+M.curly_cmd_pairs["\\gbar*"]    = {left = "",  middle = " |", right = ""}
+
+local cmd_fn = {}
+cmd_fn["\\enquote"] = conceal_curly
+cmd_fn["\\textelp"] = conceal_curly
+cmd_fn["\\textins"] = conceal_curly
+cmd_fn["\\textit"]  = conceal_curly
+cmd_fn["\\mathit"]  = conceal_curly
+cmd_fn["\\text"]    = conceal_curly
+cmd_fn["\\frac"]    = two_arg
+cmd_fn["\\nicefrac"]    = two_arg
+cmd_fn["\\dfrac"]    = two_arg
+cmd_fn["\\gbar"]    = two_arg
+cmd_fn["\\gbar*"]    = two_arg
 
 M.curly_cmd = function(lang, node)
   local cmd_node = node:field("command")[1]
   local cmd_name = ts.get_node_text(cmd_node, info.bufnr)
-  if M.curly_cmd_pairs[cmd_name] ~= nil then
-    conceal_curly(lang, node, cmd_name)
+  if cmd_fn[cmd_name] ~= nil then
+    cmd_fn[cmd_name](lang, node, cmd_name)
   else
     return nil
   end
