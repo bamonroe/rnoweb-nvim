@@ -17,6 +17,7 @@ M.queries.latex = {
   conceal_cmd = "(generic_command (command_name)) @cmd",
   citation    = "(citation) @cite",
   begin       = "(begin) @begin",
+  ref         = "(label_reference) @label",
 }
 
 M.queries.rnoweb = {
@@ -64,9 +65,49 @@ M.sym.latex['\\Pi']     = {"Π"}
 M.sym.latex['\\Psi']    = {"Ψ"}
 M.sym.latex['\\Sigma']  = {"Σ"}
 
+-- Binary operation symbols
+M.sym.latex['\\pm']     = {"±"}
+M.sym.latex['\\mp']     = {"∓ "}
+M.sym.latex['\\times']  = {""}
+M.sym.latex['\\div']    = {"÷"}
+M.sym.latex['\\ast']    = {"∗ "}
+M.sym.latex['\\star']   = {"⋆"}
+M.sym.latex['\\circ']   = {"◦"}
+M.sym.latex['\\bullet'] = {"•"}
+M.sym.latex['\\cdot']   = {"·"}
+
+M.sym.latex['\\cap']      = {"∩"}
+M.sym.latex['\\cup']      = {"∪"}
+M.sym.latex['\\uplus']    = {"⊎"}
+M.sym.latex['\\sqcap']    = {"⊓"}
+M.sym.latex['\\sqcup']    = {"⊔"}
+M.sym.latex['\\vee']      = {"⋁ "}
+M.sym.latex['\\wedge']    = {"⋀ "}
+M.sym.latex['\\setminus'] = {"\\"}
+M.sym.latex['\\wr']       = {"≀"}
+
+M.sym.latex['\\diamond']         = {"⋄"}
+M.sym.latex['\\bigtriangleup']   = {"△ "}
+M.sym.latex['\\bigtriangledown'] = {"▽"}
+M.sym.latex['\\triangleleft']    = {"◃"}
+M.sym.latex['\\triangleright']   = {"▹"}
+M.sym.latex['\\lhd*']            = {"◁ "}
+M.sym.latex['\\rhd*']            = {"▷ "}
+M.sym.latex['\\unlhd*']          = {"⊴ "}
+M.sym.latex['\\unrhd*']          = {"⊵ "}
+
+M.sym.latex['\\oplus']   = {"⊕ "}
+M.sym.latex['\\ominus']  = {"⊖ "}
+M.sym.latex['\\otimes']  = {"⊗ "}
+M.sym.latex['\\oslash']  = {"⊘ "}
+M.sym.latex['\\odot']    = {"⊙ "}
+M.sym.latex['\\bigcirc'] = {"◯ "}
+M.sym.latex['\\dagger']  = {"†"}
+M.sym.latex['\\ddagger'] = {"‡"}
+M.sym.latex['\\amalg']   = {"⨿"}
+
 -- Math things
 M.sym.latex['\\infty']       = {"∞"}
-M.sym.latex['\\times']       = {""}
 M.sym.latex['\\geq']         = {"≥"}
 M.sym.latex['\\leq']         = {"≤"}
 M.sym.latex['\\approx']      = {"≈"}
@@ -79,7 +120,7 @@ M.sym.latex['\\prec']        = {"≺"}
 M.sym.latex['\\int']         = {"∫"}
 M.sym.latex['\\sum']         = {"∑"}
 M.sym.latex['\\ln']          = {"ln"}
-M.sym.latex['\\exp']         = {"e"}
+M.sym.latex['\\exp']         = {"ℯ"}
 M.sym.latex['\\in']          = {"Є"}
 M.sym.latex['\\forall']      = {"∀"}
 M.sym.latex['\\exists']      = {"∃"}
@@ -121,7 +162,6 @@ M.sym.latex['\\nwarrow']            = {"↖ "}
 M.sym.latex['\\rightleftharpoons']  = {"⇌ "}
 
 -- Non-greeks
-M.sym.latex['\\cdot']     = {"•"}
 M.sym.latex['\\footnote'] = {"*"}
 
 -- Spacing commands
