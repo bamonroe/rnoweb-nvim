@@ -6,40 +6,6 @@ local info = require'rnoweb-nvim.info'
 
 local M = {}
 
-M.replace = function(lang, node)
-
-  local l0, c0, _, c1 = node:range()
-  local clen  = c1 - c0
-  local cmd = h.gtext(node)
-
-  local text = sym.get_sym(lang, cmd)
-  if text == nil then return(nil) end
-
-  text = string.sub(text, 1, clen)
-  local slen = h.slen(text)
-  local pad_amt = clen - slen
-
-  -- local ptext = h.center_pad(text, pad_amt)
-
-  local opts = {
-    end_col = c1,
-    virt_text = {{'', "Conceal"}},
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = text,
-  }
-
-  h.mc_conceal(
-    info.bufnr,
-    info.ns,
-    l0,
-    c0,
-    opts,
-    clen
-  )
-
-end
-
 local author_year = function(a)
   local out = {}
   for _, v in pairs(a) do
@@ -107,10 +73,6 @@ M.citation = function(lang, node)
     end
   end
 
-  local tlen = h.slen(display)
-  local pad_amt = clen - tlen
-  local ptext = h.center_pad(display, pad_amt)
-
   local opts = {
     end_col = c1,
     hl_group = "TSTextReference",
@@ -165,13 +127,10 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
     end_col  = cmd_range[4]
   else
     end_line = arg_ranges[1][1]
-    end_col  = arg_ranges[1][2]
+    end_col  = arg_ranges[1][2] + 1
   end
 
   local clen = end_col - beg_col
-
-  vim.pretty_print("here0")
-  vim.pretty_print({beg_line, beg_col, end_line, end_col})
 
   -- Opening symbol
   local opts = {
@@ -195,29 +154,25 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
     return(nil)
   end
 
-  vim.pretty_print("here1")
   -- Loop through the args, applying conceals in order
   beg_line = node_range[1]
   beg_col  = node_range[2]
 
   for i = 1,nargs do
 
-    vim.pretty_print("i is " .. i)
     beg_line = arg_ranges[i][3]
     beg_col  = arg_ranges[i][4]
     if i < nargs then
-      end_line = arg_ranges[i + 1][3]
-      end_col  = arg_ranges[i + 1][4]
+      end_line = arg_ranges[i][3]
+      end_col  = arg_ranges[i][4] + 1
     else
+      beg_col  = beg_col - 1
       end_line = arg_ranges[i][3]
       end_col  = arg_ranges[i][4]
     end
 
-    vim.pretty_print({beg_line, beg_col, end_line, end_col})
 
     text = sym.sym[lang][cmd_name][i + 1]
-    local text0 = sym.sym[lang][cmd_name]
-    vim.pretty_print(text0)
 
     -- Opening symbol
     opts = {
@@ -244,15 +199,12 @@ end
 
 M.conceal_cmd = function(lang, node)
 
-
-  vim.pretty_print("----------------------------")
-  vim.pretty_print(h.gtext(node))
-
   local cmd_node = node:field("command")
   cmd_node = cmd_node[1]
   if cmd_node == nil then return nil end
 
   local cmd_name = ts.get_node_text(cmd_node, info.bufnr)
+
   if sym.sym[lang][cmd_name] ~= nil then
     conceal_cmd_fn(lang, node, cmd_name)
   end

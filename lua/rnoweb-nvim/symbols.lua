@@ -83,8 +83,8 @@ M.sym.latex['\\in']          = {"Є"}
 M.sym.latex['\\forall']      = {"∀"}
 M.sym.latex['\\exists']      = {"∃"}
 
-M.sym.latex['\\lbrace']         = {"{"}
-M.sym.latex['\\rbrace']         = {"}"}
+M.sym.latex['\\lbrace'] = {"{"}
+M.sym.latex['\\rbrace'] = {"}"}
 
 -- Arrows
 M.sym.latex['\\leftarrow']          = {"← "}
@@ -147,11 +147,10 @@ M.sym.latex["\\textins"]  = {"[", "]"}
 M.sym.latex["\\textit"]   = {"",  ""}
 M.sym.latex["\\mathit"]   = {"",  ""}
 M.sym.latex["\\text"]     = {"",  ""}
+M.sym.latex["\\begin"]    = {"[",  "]"}
 M.sym.latex["\\frac"]     = {"",  " ⁄", ""}
 M.sym.latex["\\nicefrac"] = {"",  " ⁄", ""}
 M.sym.latex["\\dfrac"]    = {"",  " ⁄", ""}
-M.sym.latex["\\gbar"]     = {"(", " |", ")"}
-M.sym.latex["\\gbar*"]    = {"",  " |", ""}
 
 -- Latex mappings can also include the underscored
 for k, _ in pairs(M.sym.latex) do
@@ -162,8 +161,8 @@ M.set_sym = function(lang, key, sym)
   if M.sym[lang] == nil then
     M.sym[lang] = {}
   end
+
   M.sym[lang][key] = sym
-  M.sym[lang][key .. "_"] = sym .. "_"
 end
 
 M.get_sym = function(l, m)
