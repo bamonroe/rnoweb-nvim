@@ -210,4 +210,103 @@ M.conceal_cmd = function(lang, node)
   end
 end
 
+local in_table= function(v, t)
+  local out = false
+  for _,i in pairs(t) do
+    if i == v then
+      out = true
+      break
+    end
+  end
+  return out
+end
+
+M.begin = function(lang, beg_node)
+
+  local cmd_node = beg_node:field("name")[1]:field("text")[1]
+  local name = ts.get_node_text(cmd_node, info.bufnr)
+
+  -- Currently just dealing with equations
+  local v = in_table(name, {"equation", "align"})
+  if not v  then return(nil) end
+
+  local rname = name
+  name = "math"
+
+  -- Initialize if empty
+  info["beg_env"] = info["beg_env"] == nil and {} or info["beg_env"]
+
+  if info["beg_env"][name] == nil then
+    info["beg_env"][name] = {
+      count = 0,
+      label = {}
+    }
+  end
+  --
+  -- Always "math_environment" for equation begins, not always with a label
+  local parent = beg_node:parent()
+
+  -- If we're in an align environment, we need to count the number of line
+  -- breaks in the top-level environment
+  local count = 1
+  if rname == "align" then
+    for n in parent:iter_children() do
+      local nt = n:type()
+      if nt == "generic_command" then
+        local cname = n:field("command")[1]
+        cname = ts.get_node_text(cname, info.bufnr)
+        if cname == "\\\\" then
+          count = count + 1
+        end
+      end
+    end
+  end
+
+  -- Increment
+  local eqcount = info["beg_env"][name]["count"]
+  local label_count = eqcount
+  info["beg_env"][name]["count"] = info["beg_env"][name]["count"] + count
+
+  for n in parent:iter_children() do
+    if n:type() == "label_definition" then
+      label_count = label_count + 1
+      local label = n:field("name")[1]
+      label = label:field("text")[1]
+      label = ts.get_node_text(label, info.bufnr)
+      info["beg_env"][name]["label"][label] = "(" .. label_count .. ")"
+    end
+  end
+
+  -- Opening symbol
+  local brange = {beg_node:range()}
+  local text = " Equation"
+  if count > 1 then
+    text = text .. "s "
+    for i = 1,count do
+      if i == count then
+        text = text .. (eqcount + i)
+      else
+        text = text .. (eqcount + i) .. ", "
+      end
+    end
+  else
+    text = text .. " " .. (eqcount + 1)
+  end
+
+  local opts = {
+    end_line = brange[1],
+    virt_text_pos = "eol",
+    virt_text_hide = true,
+    virt_text = {{text, "Conceal"}}
+  }
+
+  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
+    info.bufnr,
+    info.ns,
+    brange[1],
+    brange[4],
+    opts)
+
+end
+
 return M

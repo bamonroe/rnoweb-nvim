@@ -16,6 +16,7 @@ local M = {
 M.queries.latex = {
   conceal_cmd = "(generic_command (command_name)) @cmd",
   citation    = "(citation) @cite",
+  begin       = "(begin) @begin",
 }
 
 M.queries.rnoweb = {

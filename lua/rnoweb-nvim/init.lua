@@ -1,9 +1,9 @@
 local M = {}
 
-local sym  = require'rnoweb-nvim.symbols'
-local nh   = require'rnoweb-nvim.node_hooks'
-local h    = require'rnoweb-nvim.helpers'
-local info = require'rnoweb-nvim.info'
+local sym   = require'rnoweb-nvim.symbols'
+local nh    = require'rnoweb-nvim.node_hooks'
+local h     = require'rnoweb-nvim.helpers'
+local info  = require'rnoweb-nvim.info'
 
 local q    = vim.treesitter.query
 
@@ -12,6 +12,7 @@ M.del_marks = function()
   for _, val in pairs(info.ids) do
     v.nvim_buf_del_extmark(info.bufnr, info.ns, val)
   end
+  info["beg_env"] = nil
 end
 
 M.mask_inline = function()
