@@ -13,6 +13,15 @@ local M = {
   },
 }
 
+-- Not many rnoweb queies available
+table.insert(M.queries.rnoweb, {
+  fn    = "conceal_cmd",
+  query = "(rinline) @cmd",
+})
+
+M.sym.rnoweb["\\Sexpr"]  = {"ﳒ"}
+
+-- Lots for Latex
 table.insert(M.queries.latex, {
   fn    = "conceal_cmd",
   query = "(generic_command (command_name)) @cmd",
@@ -30,14 +39,11 @@ table.insert(M.queries.latex, {
   fn    = "ref",
   query = "(label_reference) @label",
 })
-
-table.insert(M.queries.rnoweb, {
-  fn    = "conceal_cmd",
-  query = "(rinline) @cmd",
+table.insert(M.queries.latex, {
+  fn    = "mdelimit",
+  query = "(math_delimiter) @math",
 })
 
--- Not many rnoweb queies available
-M.sym.rnoweb["\\Sexpr"]  = {"ﳒ"}
 
 -- Lots of latex replacements
 -- Start with the greeks

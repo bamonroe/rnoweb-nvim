@@ -341,4 +341,78 @@ M.ref = function(lang, node)
 
 end
 
+M.mdelimit = function(lang, node)
+
+  vim.pretty_print("---------------")
+
+  local nrange = {node:range()}
+
+  local lchild = node:child(1)
+  local lrange = {lchild:range()}
+  local rchild = node:child(node:child_count() - 1)
+  local rrange = {rchild:range()}
+
+  local ldelim = h.gtext(lchild)
+  local rdelim = h.gtext(rchild)
+
+  local s = sym.sym.latex
+
+  ldelim = s[ldelim] ~= nil and s[ldelim][1] or ldelim
+  rdelim = s[rdelim] ~= nil and s[rdelim][1] or rdelim
+
+  local beg_line = nrange[1]
+  local end_line = lrange[1]
+
+  local beg_col = nrange[2]
+  local end_col = lrange[4]
+
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = ldelim
+  }
+
+  local clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
+
+  beg_line = rrange[1]
+  end_line = nrange[3]
+
+  beg_col = rrange[2] - 6
+  end_col = nrange[4]
+
+  vim.pretty_print(rdelim)
+
+  opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = rdelim
+  }
+
+  clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
+
+
+
+
+end
+
 return M

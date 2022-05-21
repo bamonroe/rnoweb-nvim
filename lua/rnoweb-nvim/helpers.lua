@@ -1,3 +1,4 @@
+local ts   = vim.treesitter
 local info = require'rnoweb-nvim.info'
 
 local M = {}
@@ -99,11 +100,7 @@ M.write_lines = function(file, lines)
 end
 
 M.gtext = function(node)
-  local l0, c0, l1, c1 = node:range()
-  local lines = vim.api.nvim_buf_get_lines(info.bufnr, l0, l1 + 1, false)
-  local out = lines[1]
-  out = string.sub(out, c0 + 1, c1)
-  return(out)
+  return ts.get_node_text(node, info.bufnr)
 end
 
 M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
