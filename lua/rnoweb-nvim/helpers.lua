@@ -152,4 +152,22 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
 
 end
 
+M.in_tablev= function(v, t)
+  for _,i in pairs(t) do
+    if i == v then
+      return(true)
+    end
+  end
+  return false
+end
+
+M.in_tablek= function(v, t)
+  for k,_ in pairs(t) do
+    if k == v then
+      return(true)
+    end
+  end
+  return false
+end
+
 return M

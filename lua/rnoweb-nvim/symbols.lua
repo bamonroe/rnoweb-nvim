@@ -13,19 +13,31 @@ local M = {
   },
 }
 
-M.queries.latex = {
-  conceal_cmd = "(generic_command (command_name)) @cmd",
-  citation    = "(citation) @cite",
-  begin       = "(begin) @begin",
-  ref         = "(label_reference) @label",
-}
+table.insert(M.queries.latex, {
+  fn    = "conceal_cmd",
+  query = "(generic_command (command_name)) @cmd",
+})
 
-M.queries.rnoweb = {
-  conceal_cmd = "(rinline (command_name) @cmd)",
-}
+table.insert(M.queries.latex, {
+  fn    = "citation",
+  query = "(citation) @cite",
+})
+table.insert(M.queries.latex, {
+  fn    = "begin",
+  query = "(begin) @begin",
+})
+table.insert(M.queries.latex, {
+  fn    = "ref",
+  query = "(label_reference) @label",
+})
+
+table.insert(M.queries.rnoweb, {
+  fn    = "conceal_cmd",
+  query = "(rinline) @cmd",
+})
 
 -- Not many rnoweb queies available
-M.sym.rnoweb["\\Sexpr"]  = "ﳒ"
+M.sym.rnoweb["\\Sexpr"]  = {"ﳒ"}
 
 -- Lots of latex replacements
 -- Start with the greeks
@@ -163,6 +175,8 @@ M.sym.latex['\\rightleftharpoons']  = {"⇌ "}
 
 -- Non-greeks
 M.sym.latex['\\footnote'] = {"*"}
+M.sym.latex["\\ldots"]    = {"…"}
+M.sym.latex["\\\\"]    = {"↲ "}
 
 -- Spacing commands
 M.sym.latex['\\qquad'] = {"    "}
@@ -189,9 +203,9 @@ M.sym.latex["\\textit"]   = {"",  ""}
 M.sym.latex["\\mathit"]   = {"",  ""}
 M.sym.latex["\\text"]     = {"",  ""}
 M.sym.latex["\\begin"]    = {"[",  "]"}
-M.sym.latex["\\frac"]     = {"",  " ⁄", ""}
-M.sym.latex["\\nicefrac"] = {"",  " ⁄", ""}
-M.sym.latex["\\dfrac"]    = {"",  " ⁄", ""}
+M.sym.latex["\\frac"]     = {"(",  "╱ ", ")"}
+M.sym.latex["\\nicefrac"] = {"(",  "╱ ", ")"}
+M.sym.latex["\\dfrac"]    = {"(",  "╱ ", ")"}
 
 -- Latex mappings can also include the underscored
 for k, _ in pairs(M.sym.latex) do
@@ -226,7 +240,9 @@ M.get_queries = function(root, bufnr)
   local lt = M.queries
   local out = {}
   for lang, _ in pairs(lt) do
-    for name, query in pairs(lt[lang]) do
+    for _, k in ipairs(lt[lang]) do
+      local name  = k["fn"]
+      local query = k["query"]
       query = q.parse_query(lang, query)
       out[#out+1] = {
         cmd   = name,

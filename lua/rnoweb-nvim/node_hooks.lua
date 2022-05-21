@@ -93,10 +93,15 @@ end
 
 local conceal_cmd_fn = function(lang, node, cmd_name)
 
+  local field = "command"
+  if lang == "rnoweb" then
+    field = "Sexpr"
+  end
+
   -- Full range of the node
   local node_range = {node:range()}
   -- Node for the command name
-  local cmd_node  = node:field("command")
+  local cmd_node  = node:field(field)
   -- Rang of the command name
   local cmd_range = {cmd_node[1]:range()}
   -- Get the table of arg nodes
@@ -199,7 +204,11 @@ end
 
 M.conceal_cmd = function(lang, node)
 
-  local cmd_node = node:field("command")
+  local field = "command"
+  if lang == "rnoweb" then
+    field = "Sexpr"
+  end
+  local cmd_node = node:field(field)
   cmd_node = cmd_node[1]
   if cmd_node == nil then return nil end
 
@@ -210,24 +219,13 @@ M.conceal_cmd = function(lang, node)
   end
 end
 
-local in_table= function(v, t)
-  local out = false
-  for _,i in pairs(t) do
-    if i == v then
-      out = true
-      break
-    end
-  end
-  return out
-end
-
 M.begin = function(lang, beg_node)
 
   local cmd_node = beg_node:field("name")[1]:field("text")[1]
   local name = ts.get_node_text(cmd_node, info.bufnr)
 
   -- Currently just dealing with equations
-  local v = in_table(name, {"equation", "align"})
+  local v = h.in_tablev(name, {"equation", "align"})
   if not v  then return(nil) end
 
   local rname = name
@@ -239,8 +237,8 @@ M.begin = function(lang, beg_node)
   if info["beg_env"][name] == nil then
     info["beg_env"][name] = {
       count = 0,
-      label = {}
     }
+    info["beg_env"]["label"] = {}
   end
   --
   -- Always "math_environment" for equation begins, not always with a label
@@ -273,7 +271,7 @@ M.begin = function(lang, beg_node)
       local label = n:field("name")[1]
       label = label:field("text")[1]
       label = ts.get_node_text(label, info.bufnr)
-      info["beg_env"][name]["label"][label] = "(" .. label_count .. ")"
+      info["beg_env"]["label"][label] = "" .. label_count .. ""
     end
   end
 
@@ -306,6 +304,40 @@ M.begin = function(lang, beg_node)
     brange[1],
     brange[4],
     opts)
+
+end
+
+M.ref = function(lang, node)
+
+  local name = node:field("names")[1]
+  name = name:field("text")[1]
+  name = ts.get_node_text(name, info.bufnr)
+
+  local val = info["beg_env"]["label"][name]
+
+  -- If we haven't got a replacement for this ref, just skip it
+  if val == nil then return nil end
+
+  local beg_line, beg_col, end_line, end_col = node:range()
+
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = val
+  }
+
+  local clen = end_col - beg_col
+
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
 
 end
 
