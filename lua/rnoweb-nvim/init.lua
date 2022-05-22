@@ -129,5 +129,12 @@ M.make_spell = function()
 
 end
 
+M.refresh = function()
+    M.del_marks()
+    M.mask_inline()
+    M.mask_texsym()
+    M.make_spell()
+end
+
 
 return M

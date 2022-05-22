@@ -343,8 +343,6 @@ end
 
 M.mdelimit = function(lang, node)
 
-  vim.pretty_print("---------------")
-
   local nrange = {node:range()}
 
   local lchild = node:child(1)
@@ -390,8 +388,6 @@ M.mdelimit = function(lang, node)
   beg_col = rrange[2] - 6
   end_col = nrange[4]
 
-  vim.pretty_print(rdelim)
-
   opts = {
     end_col = end_col,
     end_line = end_line,
@@ -409,9 +405,6 @@ M.mdelimit = function(lang, node)
     opts,
     clen
   )
-
-
-
 
 end
 
