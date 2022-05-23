@@ -109,10 +109,10 @@ M.sym.latex['\\bigtriangleup']   = {"△ "}
 M.sym.latex['\\bigtriangledown'] = {"▽"}
 M.sym.latex['\\triangleleft']    = {"◃"}
 M.sym.latex['\\triangleright']   = {"▹"}
-M.sym.latex['\\lhd*']            = {"◁ "}
-M.sym.latex['\\rhd*']            = {"▷ "}
-M.sym.latex['\\unlhd*']          = {"⊴ "}
-M.sym.latex['\\unrhd*']          = {"⊵ "}
+M.sym.latex['\\lhd']             = {"◁ "}
+M.sym.latex['\\rhd']             = {"▷ "}
+M.sym.latex['\\unlhd']           = {"⊴ "}
+M.sym.latex['\\unrhd']           = {"⊵ "}
 
 M.sym.latex['\\oplus']   = {"⊕ "}
 M.sym.latex['\\ominus']  = {"⊖ "}
@@ -124,27 +124,47 @@ M.sym.latex['\\dagger']  = {"†"}
 M.sym.latex['\\ddagger'] = {"‡"}
 M.sym.latex['\\amalg']   = {"⨿"}
 
--- Math things
-M.sym.latex['\\infty']       = {"∞"}
-M.sym.latex['\\geq']         = {"≥"}
-M.sym.latex['\\leq']         = {"≤"}
-M.sym.latex['\\approx']      = {"≈"}
-M.sym.latex['\\propto']      = {"∝"}
-M.sym.latex['\\sim']         = {"∼"}
-M.sym.latex['\\succcurlyeq'] = {"≽"}
-M.sym.latex['\\preccurlyeq'] = {"≼"}
-M.sym.latex['\\succ']        = {"≻"}
-M.sym.latex['\\prec']        = {"≺"}
-M.sym.latex['\\int']         = {"∫"}
-M.sym.latex['\\sum']         = {"∑"}
-M.sym.latex['\\ln']          = {"ln"}
-M.sym.latex['\\exp']         = {"ℯ"}
-M.sym.latex['\\in']          = {"Є"}
-M.sym.latex['\\forall']      = {"∀"}
-M.sym.latex['\\exists']      = {"∃"}
+-- Relation symbols
+M.sym.latex['\\leq']        = {"≤"}
+M.sym.latex['\\prec']       = {"≺ "}
+M.sym.latex['\\ll']         = {"≪ "}
+M.sym.latex['\\preceq']     = {"⪯ "}
+M.sym.latex['\\subset']     = {"⊂ "}
+M.sym.latex['\\supseteq']   = {"⊇ "}
+M.sym.latex['\\sqsubset']   = {"⊏ "}
+M.sym.latex['\\sqsubseteq'] = {"⊑ "}
+M.sym.latex['\\in']         = {"∈ "}
+M.sym.latex['\\vdash']      = {"⊢ "}
 
-M.sym.latex['\\lbrace'] = {"{"}
-M.sym.latex['\\rbrace'] = {"}"}
+M.sym.latex['\\geq']        = {"≥"}
+M.sym.latex['\\succ']       = {"≻ "}
+M.sym.latex['\\succeq']     = {"⪰ "}
+M.sym.latex['\\gg']         = {"≫ "}
+M.sym.latex['\\supset']     = {"⊃ "}
+M.sym.latex['\\subseteq']   = {"⊆ "}
+M.sym.latex['\\sqsupset']   = {"⊐ "}
+M.sym.latex['\\sqsupseteq'] = {"⊒ "}
+M.sym.latex['\\ni']         = {"∋ "}
+M.sym.latex['\\dashv']      = {"⊣ "}
+
+M.sym.latex['\\equiv']  = {"≡ "}
+M.sym.latex['\\sim']    = {"∼ "}
+M.sym.latex['\\simeq']  = {"≃ "}
+M.sym.latex['\\asymp']  = {"≍ "}
+M.sym.latex['\\approx'] = {"≈"}
+M.sym.latex['\\cong']   = {"≅"}
+M.sym.latex['\\neq']    = {"≠"}
+M.sym.latex['\\doteq']  = {"≐ "}
+M.sym.latex['\\propto'] = {"∝"}
+
+M.sym.latex['\\models']   = {"⊧"}
+M.sym.latex['\\perp']     = {"⊥ "}
+M.sym.latex['\\mid']      = {"|"}
+M.sym.latex['\\parallel'] = {"∥"}
+M.sym.latex['\\bowtie']   = {"⨝ "}
+M.sym.latex['\\Join']     = {"⋈ "}
+M.sym.latex['\\smile']    = {"⌣ "}
+M.sym.latex['\\frown']    = {"⌢ "}
 
 -- Arrows
 M.sym.latex['\\leftarrow']          = {"← "}
@@ -179,10 +199,27 @@ M.sym.latex['\\rightharpoondown']   = {"⇁ "}
 M.sym.latex['\\nwarrow']            = {"↖ "}
 M.sym.latex['\\rightleftharpoons']  = {"⇌ "}
 
+-- Math things
+M.sym.latex['\\infty']       = {"∞"}
+M.sym.latex['\\succcurlyeq'] = {"≽"}
+M.sym.latex['\\preccurlyeq'] = {"≼"}
+M.sym.latex['\\int']         = {"∫"}
+M.sym.latex['\\sum']         = {"∑"}
+M.sym.latex['\\ln']          = {"ln"}
+M.sym.latex['\\exp']         = {"ℯ"}
+M.sym.latex['\\forall']      = {"∀"}
+M.sym.latex['\\exists']      = {"∃"}
+
+M.sym.latex['\\lbrace'] = {"{"}
+M.sym.latex['\\rbrace'] = {"}"}
+M.sym.latex['\\{']      = {"{"}
+M.sym.latex['\\}']      = {"}"}
+
+
 -- Non-greeks
 M.sym.latex['\\footnote'] = {"*"}
 M.sym.latex["\\ldots"]    = {"…"}
-M.sym.latex["\\\\"]    = {"↲ "}
+M.sym.latex["\\\\"]       = {"↲ "}
 
 -- Spacing commands
 M.sym.latex['\\qquad'] = {"    "}
@@ -195,11 +232,12 @@ M.sym.latex['\\space'] = {" "}
 M.sym.latex['\\!']     = {""}
 
 -- Just remove some things
-M.sym.latex['\\noindent']  = {""}
-M.sym.latex['\\textcite']  = {""}
-M.sym.latex['\\parencite'] = {""}
-M.sym.latex['\\left']      = {""}
-M.sym.latex['\\right']     = {""}
+M.sym.latex['\\displaystyle']  = {""}
+M.sym.latex['\\noindent']      = {""}
+M.sym.latex['\\textcite']      = {""}
+M.sym.latex['\\parencite']     = {""}
+M.sym.latex['\\left']          = {""}
+M.sym.latex['\\right']         = {""}
 
 -- Commands with arguments
 M.sym.latex["\\enquote"]  = {"“", "”"}
