@@ -50,6 +50,13 @@ M.slen = function(s)
   return count
 end
 
+M.ncols = function(lnum)
+  local line = vim.api.nvim_buf_get_lines(info.bufnr, lnum, lnum + 1, true)[1]
+  local tabstop = vim.api.nvim_get_option("tabstop")
+  line = line:gsub("\t", string.rep(" ", tabstop))
+  return M.slen(line)
+end
+
 M.gmatch = function(s)
   local out = {}
   for c in s:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
@@ -107,46 +114,56 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
 
   local conceal_text = opts["conceal"]
   local conceal_len  = M.slen(conceal_text)
+  local conceal_utf8 = M.gmatch(conceal_text)
 
   local padding = node_len - conceal_len
 
   -- Firstly, conceal the padding
   local nopts = {
-    end_line = opts["end_line"],
-    end_col  = beg_col + padding,
-    virt_text = {{'', "Conceal"}},
-    virt_text_pos = "overlay",
+    end_line       = opts["end_line"],
+    end_col        = beg_col + padding,
+    virt_text      = {{'', "Conceal"}},
+    virt_text_pos  = "overlay",
     virt_text_hide = true,
-    conceal = '',
+    conceal        = '',
   }
-  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
-    bufnr,
-    ns,
-    beg_line,
-    beg_col,
-    nopts)
 
-  local ct_utf8 = M.gmatch(conceal_text)
+  if padding > -1 then
+    info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
+      bufnr,
+      ns,
+      beg_line,
+      beg_col,
+      nopts)
+  end
+
+  local end_line = opts["end_line"] or beg_line
 
   for i = 1,conceal_len do
-    local cchar = ct_utf8[i]
+    local nbeg_col = beg_col + padding + i - 1
+    local end_col  = beg_col + padding + i
+
+    local cchar = conceal_utf8[i]
+    local vtext = ''
+    local pos   = "overlay"
+
     nopts = {
-      end_line = opts["end_line"],
-      end_col  = beg_col + padding + i,
-      virt_text = {{'', "Conceal"}},
-      virt_text_pos = "overlay",
+      end_line       = end_line,
+      end_col        = end_col,
+      virt_text      = {{vtext, "Conceal"}},
+      virt_text_pos  = pos,
       virt_text_hide = true,
-      hl_group = opts["hl_group"],
-      conceal = cchar,
+      hl_group       = opts["hl_group"],
+      conceal        = cchar,
+      strict         = false,
     }
     info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
       bufnr,
       ns,
       beg_line,
-      beg_col + padding + i - 1,
+      nbeg_col,
       nopts)
   end
-
 end
 
 M.in_tablev= function(v, t)

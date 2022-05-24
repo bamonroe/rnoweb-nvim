@@ -136,5 +136,4 @@ M.refresh = function()
     M.make_spell()
 end
 
-
 return M
