@@ -46,6 +46,7 @@ end
 --
 -- Function to get length of string in charachter count, not byte count
 M.slen = function(s)
+  if s == nil then return(0) end
   local _, count = string.gsub(s, "[^\128-\193]", "")
   return count
 end
@@ -59,6 +60,7 @@ end
 
 M.gmatch = function(s)
   local out = {}
+  if s == nil then return out end
   for c in s:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
     out[#out+1] = c
   end
