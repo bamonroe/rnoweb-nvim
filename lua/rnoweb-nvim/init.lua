@@ -7,6 +7,8 @@ local info  = require'rnoweb-nvim.info'
 
 local q    = vim.treesitter.query
 
+-- This function deletes the extmarks that have been created by this plugin
+-- This is how marks are "refreshed"
 M.del_marks = function()
   local v = vim.api
   for _, val in pairs(info.ids) do
@@ -15,6 +17,8 @@ M.del_marks = function()
   info["beg_env"] = nil
 end
 
+-- This function replaces inline R code with the results of that code
+-- not useful for stand-alone LaTeX
 M.mask_inline = function()
   -- Clear the current marks
   local parser = vim.treesitter.get_parser(info.bufnr)
@@ -26,11 +30,10 @@ M.mask_inline = function()
   local count = 0
   for _, match, _ in inline:iter_matches(root, info.bufnr) do
     for _, node in pairs(match) do
+      -- Need to count matches to correctly get the code results
       count = count + 1
-
       -- Get the rane of this node
       local l0, c0, _, c1 = node:range()
-
       -- Get the text that will be in this ndoe
       local fname = "./inline/" .. count .. ".txt"
       local text = h.read_lines(fname)[1]
@@ -40,7 +43,6 @@ M.mask_inline = function()
 
       text = text and text or ntext
       text = string.sub(text, 1, clen)
-      local pad_amt = clen - h.slen(text)
 
       local opts = {
         end_col = c1,
@@ -49,6 +51,7 @@ M.mask_inline = function()
         conceal = text
       }
 
+      -- Multi-character conceal
       h.mc_conceal(
         info.bufnr,
         info.ns,
@@ -62,10 +65,9 @@ M.mask_inline = function()
   end
 end
 
+-- This is the meaty function that does the latex concealing
 M.mask_texsym = function()
-
   local parser = vim.treesitter.get_parser(info.bufnr)
-
   parser:for_each_tree(function(_, tree)
     local ttree = tree:parse()
     local root  = ttree[1]:root()
@@ -81,6 +83,10 @@ M.mask_texsym = function()
 
 end
 
+-- Unfortunatly, basically all latex commands show as badly spelled. this
+-- function writes the latex command names to a file, generates a spell file,
+-- and appends to the spell-lang. This helps with a huge amount of spelling
+-- misses.
 M.make_spell = function()
   -- Shortcuts
   local parser = vim.treesitter.get_parser(info.bufnr)
@@ -129,6 +135,7 @@ M.make_spell = function()
 
 end
 
+-- This is the main function to call
 M.refresh = function()
     M.del_marks()
     M.mask_inline()

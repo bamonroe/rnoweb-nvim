@@ -44,7 +44,6 @@ table.insert(M.queries.latex, {
   query = "(math_delimiter) @math",
 })
 
-
 -- Lots of latex replacements
 -- Start with the greeks
 M.sym.latex['\\alpha']    = {"α"}
@@ -256,6 +255,7 @@ for k, _ in pairs(M.sym.latex) do
   M.sym.latex[k .. "_"] = {M.sym.latex[k][1] .. "_"}
 end
 
+-- I use this to set project specific replacements
 M.set_sym = function(lang, key, sym)
   if M.sym[lang] == nil then
     M.sym[lang] = {}

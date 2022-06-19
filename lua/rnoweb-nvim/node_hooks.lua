@@ -19,6 +19,7 @@ local author_year = function(a)
   return(out)
 end
 
+-- Format citations nicely
 M.citation = function(lang, node)
 
   local l0, c0, _, c1 = node:range()
@@ -91,6 +92,7 @@ M.citation = function(lang, node)
   )
 end
 
+-- This is the main concealing function
 local conceal_cmd_fn = function(lang, node, cmd_name)
 
   local field = "command"
@@ -219,6 +221,7 @@ M.conceal_cmd = function(lang, node)
   end
 end
 
+-- I'm trying to keep track of the equation numbers above the environments
 M.begin = function(lang, beg_node)
 
   local cmd_node = beg_node:field("name")[1]:field("text")[1]
@@ -341,6 +344,7 @@ M.ref = function(lang, node)
 
 end
 
+-- Math delimter function
 M.mdelimit = function(lang, node)
 
   local nrange = {node:range()}
