@@ -199,6 +199,7 @@ M.sym.latex['\\nwarrow']            = {"↖ "}
 M.sym.latex['\\rightleftharpoons']  = {"⇌ "}
 
 -- Math things
+M.sym.latex['\\sqrt']        = {"√"}
 M.sym.latex['\\infty']       = {"∞"}
 M.sym.latex['\\succcurlyeq'] = {"≽"}
 M.sym.latex['\\preccurlyeq'] = {"≼"}
@@ -231,12 +232,12 @@ M.sym.latex['\\space'] = {" "}
 M.sym.latex['\\!']     = {""}
 
 -- Just remove some things
-M.sym.latex['\\displaystyle']  = {""}
-M.sym.latex['\\noindent']      = {""}
-M.sym.latex['\\textcite']      = {""}
-M.sym.latex['\\parencite']     = {""}
-M.sym.latex['\\left']          = {""}
-M.sym.latex['\\right']         = {""}
+M.sym.latex['\\displaystyle'] = {""}
+M.sym.latex['\\noindent']     = {""}
+M.sym.latex['\\textcite']     = {""}
+M.sym.latex['\\parencite']    = {""}
+M.sym.latex['\\left']         = {""}
+M.sym.latex['\\right']        = {""}
 
 -- Commands with arguments
 M.sym.latex["\\enquote"]  = {"“", "”"}
