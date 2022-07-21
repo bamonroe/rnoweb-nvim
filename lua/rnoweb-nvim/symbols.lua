@@ -199,6 +199,7 @@ M.sym.latex['\\nwarrow']            = {"↖ "}
 M.sym.latex['\\rightleftharpoons']  = {"⇌ "}
 
 -- Math things
+M.sym.latex['\\partial']     = {"∂"}
 M.sym.latex['\\sqrt']        = {"√"}
 M.sym.latex['\\infty']       = {"∞"}
 M.sym.latex['\\succcurlyeq'] = {"≽"}
