@@ -199,8 +199,8 @@ M.sym.latex['\\nwarrow']            = {"↖ "}
 M.sym.latex['\\rightleftharpoons']  = {"⇌ "}
 
 -- Math things
+M.sym.latex['\\over']        = {"/"}
 M.sym.latex['\\partial']     = {"∂"}
-M.sym.latex['\\sqrt']        = {"√"}
 M.sym.latex['\\infty']       = {"∞"}
 M.sym.latex['\\succcurlyeq'] = {"≽"}
 M.sym.latex['\\preccurlyeq'] = {"≼"}
@@ -210,6 +210,8 @@ M.sym.latex['\\ln']          = {"ln"}
 M.sym.latex['\\exp']         = {"ℯ"}
 M.sym.latex['\\forall']      = {"∀"}
 M.sym.latex['\\exists']      = {"∃"}
+M.sym.latex['\\sqrt']        = {"√", "᳒"}
+M.sym.latex['\\hat']         = {"", "̂"}
 
 M.sym.latex['\\lbrace'] = {"{"}
 M.sym.latex['\\rbrace'] = {"}"}
