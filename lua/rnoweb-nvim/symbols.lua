@@ -234,6 +234,10 @@ M.sym.latex['\\>']     = {" "}
 M.sym.latex['\\space'] = {" "}
 M.sym.latex['\\!']     = {""}
 
+-- Hide the escaping backslash with some
+M.sym.latex['\\%']     = {"%"}
+M.sym.latex['\\&']     = {"&"}
+
 -- Just remove some things
 M.sym.latex['\\displaystyle'] = {""}
 M.sym.latex['\\noindent']     = {""}
