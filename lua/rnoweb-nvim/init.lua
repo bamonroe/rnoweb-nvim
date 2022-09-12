@@ -1,11 +1,45 @@
-local M = {}
-
-local sym   = require'rnoweb-nvim.symbols'
-local nh    = require'rnoweb-nvim.node_hooks'
-local h     = require'rnoweb-nvim.helpers'
-local info  = require'rnoweb-nvim.info'
-
+local info = require'rnoweb-nvim.info'
+local sym  = require'rnoweb-nvim.symbols'
+local nh   = require'rnoweb-nvim.node_hooks'
+local h    = require'rnoweb-nvim.helpers'
 local q    = vim.treesitter.query
+
+local M = {}
+M.opts = {
+  filetypes = {"*.Rnw", "*.tex"},
+  tex2latex = true,
+  setup = false,
+}
+M.auid = vim.api.nvim_create_augroup("rnoweb-nvim-pkg", {
+  clear = true,
+})
+
+M.tex2latex = function()
+  if vim.bo.filetype == "tex" then
+    vim.pretty_print("changing to latex")
+    vim.bo.filetype = "latex"
+  end
+end
+
+-- Initial setup function
+M.setup = function(opts)
+  local dopts = {
+    filetypes = {"*.Rnw", "*.tex"},
+    tex2latex = true,
+    setup = true,
+  }
+  M.opts = opts and opts or dopts
+
+  -- Optionally force tex files to be recocnized as latex
+  if M.opts.tex2latex then
+    -- Change tex to latex
+    vim.api.nvim_create_autocmd({"FileType"}, {
+      group = M.auid,
+      pattern = {"*.tex"},
+      callback = M.tex2latex
+    })
+  end
+end
 
 -- This function deletes the extmarks that have been created by this plugin
 -- This is how marks are "refreshed"
@@ -20,6 +54,11 @@ end
 -- This function replaces inline R code with the results of that code
 -- not useful for stand-alone LaTeX
 M.mask_inline = function()
+
+  if info.ft ~= "rnoweb" then
+    return {}
+  end
+
   -- Clear the current marks
   local parser = vim.treesitter.get_parser(info.bufnr)
   local tree   = parser:parse()
@@ -141,6 +180,49 @@ M.refresh = function()
     M.mask_inline()
     M.mask_texsym()
     M.make_spell()
+end
+
+M.setup = function(opts)
+
+  local dopts = {
+    filetypes = {"*.Rnw", "*.tex"},
+    tex2latex = true,
+  }
+
+  opts = opts and opts or dopts
+
+  local v = vim.api
+  M.auid = v.nvim_create_augroup("rnoweb-nvim-pkg", {
+    clear = true,
+  })
+
+  local tex2latex = function()
+    if vim.bo.filetype == "tex" then
+      vim.pretty_print("changing to latex")
+      vim.bo.filetype = "latex"
+    end
+  end
+
+  -- Optionally force tex files to be recocnized as latex
+  if opts.tex2latex then
+    -- Change tex to latex
+    v.nvim_create_autocmd({"FileType"}, {
+      group = M.auid,
+      pattern = {"*.tex"},
+      callback = tex2latex
+    })
+  end
+
+  v.nvim_create_autocmd({"CursorHold", "BufEnter", "BufWritePost"}, {
+    group = M.auid,
+    pattern = {"*.Rnw", "*.tex"},
+    callback = function()
+      if opts.tex2latex then
+        tex2latex()
+      end
+      require('rnoweb-nvim').refresh()
+    end
+  })
 end
 
 return M
