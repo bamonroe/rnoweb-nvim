@@ -122,8 +122,11 @@ M.mask_texsym = function()
       local lang  = d["lang"]
       local query = d["query"]
       local cmd   = d["cmd"]
-      for _, node, _ in query do
-        nh[cmd](lang, node)
+      for id, node, meta in query do
+        -- Ignore nodes market with the "ignore" metadata
+        if meta["ignore"] == nil or meta["ignore"] == "false" then
+          nh[cmd](lang, node)
+        end
       end
     end
   end)

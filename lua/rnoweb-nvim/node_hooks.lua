@@ -3,6 +3,8 @@ local q    = vim.treesitter.query
 local sym  = require'rnoweb-nvim.symbols'
 local h    = require'rnoweb-nvim.helpers'
 local info = require'rnoweb-nvim.info'
+local d    = require'rnoweb-nvim.dbug'
+local ss   = require'rnoweb-nvim.super_list'
 
 local M = {}
 
@@ -402,6 +404,149 @@ M.mdelimit = function(lang, node)
   }
 
   clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
+
+end
+
+M.single_hat = function(lang, node)
+
+  local little_hats = {}
+    little_hats["a"] = "â"
+    little_hats["A"] = "Â"
+    little_hats["c"] = "ĉ"
+    little_hats["C"] = "Ĉ"
+    little_hats["e"] = "ê"
+    little_hats["E"] = "Ê"
+    little_hats["g"] = "ĝ"
+    little_hats["G"] = "Ĝ"
+    little_hats["i"] = "î"
+    little_hats["I"] = "Î"
+    little_hats["o"] = "ô"
+    little_hats["O"] = "Ô"
+    little_hats["s"] = "ŝ"
+    little_hats["S"] = "Ŝ"
+    little_hats["u"] = "û"
+    little_hats["U"] = "Û"
+    little_hats["w"] = "ŵ"
+    little_hats["W"] = "Ŵ"
+    little_hats["y"] = "ŷ"
+    little_hats["Y"] = "Ŷ"
+
+
+  local child = node:child(0)
+  local text = h.gtext(child)
+
+  local parent = node:parent():parent()
+  local range  = {parent:range()}
+
+
+  local beg_line = range[1]
+  local end_line = range[1]
+
+  local beg_col = range[2]
+  local end_col = range[4]
+
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = little_hats[text]
+  }
+
+  local clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
+end
+
+M.superscript = function(lang, node)
+
+  local child = node:child(1)
+  local text = h.gtext(child)
+
+  -- Change the text to superscripts if possible
+  local res = ""
+  for letter in text:gmatch(".") do
+    -- If the symbol is in the table, use it, otherwise go back to original
+    letter = ss.super[letter] and ss.super[letter] or letter
+    res = res .. letter
+  end
+
+  -- Now get the range of the curly gruoup and conceal it all
+  local range  = {node:range()}
+
+  local beg_line = range[1]
+  local end_line = range[1]
+
+  -- As well as the carat character in the previous node
+  local beg_col = range[2] - 1
+  local end_col = range[4]
+
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = res
+  }
+
+  local clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
+
+end
+
+M.subscript = function(lang, node)
+
+  local child = node:child(1)
+  local text = h.gtext(child)
+
+  -- Change the text to subscripts if possible
+  local res = ""
+  for letter in text:gmatch(".") do
+    -- If the symbol is in the table, use it, otherwise go back to original
+    letter = ss.sub[letter] and ss.sub[letter] or letter
+    res = res .. letter
+  end
+
+  -- Now get the range of the curly gruoup and conceal it all
+  local range  = {node:range()}
+
+  local beg_line = range[1]
+  local end_line = range[1]
+
+  -- As well as the carat character in the previous node
+  local beg_col = range[2] - 1
+  local end_col = range[4]
+
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = res
+  }
+
+  local clen = end_col - beg_col
   h.mc_conceal(
     info.bufnr,
     info.ns,

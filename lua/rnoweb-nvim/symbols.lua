@@ -49,6 +49,40 @@ table.insert(M.queries.latex, {
   query = "(math_delimiter) @math",
 })
 
+table.insert(M.queries.latex, {
+  fn    = "single_hat",
+  query = [[
+    (generic_command
+      (command_name) @cmd (#eq? @cmd "\\hat") (#set! "ignore" "true")
+      (curly_group
+        (text) @tval (#any-of? @tval "a" "A" "c" "C" "e" "E" "g" "G" "i" "I" "o" "O" "s" "S" "u" "U" "w" "W" "y" "Y")
+      )
+    )
+  ]],
+})
+
+table.insert(M.queries.latex, {
+  fn    = "superscript",
+  query = [[
+    (inline_formula
+      (text (word) @formula (#match? @formula ".*\^") (#set! "ignore" "true"))
+      (curly_group (text)) @tval
+    )
+  ]],
+})
+
+
+table.insert(M.queries.latex, {
+  fn    = "subscript",
+  query = [[
+    (inline_formula
+      (text (word) @formula (#match? @formula ".*_") (#set! "ignore" "true"))
+      (curly_group (text)) @tval
+    )
+  ]],
+})
+
+
 -- Lots of latex replacements
 -- Start with the greeks
 M.sym.latex['\\alpha']    = {"α"}
@@ -216,7 +250,6 @@ M.sym.latex['\\exp']         = {"ℯ"}
 M.sym.latex['\\forall']      = {"∀"}
 M.sym.latex['\\exists']      = {"∃"}
 M.sym.latex['\\sqrt']        = {"√", "᳒"}
-M.sym.latex['\\hat']         = {"", "̂"}
 
 M.sym.latex['\\lbrace'] = {"{"}
 M.sym.latex['\\rbrace'] = {"}"}
