@@ -210,6 +210,7 @@ M.conceal_cmd = function(lang, node)
   if lang == "rnoweb" then
     field = "Sexpr"
   end
+
   local cmd_node = node:field(field)
   cmd_node = cmd_node[1]
   if cmd_node == nil then return nil end

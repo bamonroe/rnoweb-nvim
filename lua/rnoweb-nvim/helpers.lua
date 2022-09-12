@@ -3,6 +3,16 @@ local info = require'rnoweb-nvim.info'
 
 local M = {}
 
+-- A debugging function that writes to a file
+M.db = function (line)
+  line = vim.inspect(line)
+  local file = "/tmp/dbug"
+  local fp = io.open(file, "a")
+  fp:write(line, "\n")
+  fp:flush()
+  fp:close()
+end
+
 M.split = function(pString, pPattern)
    local Table = {}  -- NOTE: use {n = 0} in Lua-5.0
    local fpat = "(.-)" .. pPattern
@@ -159,6 +169,7 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
       conceal        = cchar,
       strict         = false,
     }
+
     info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
       bufnr,
       ns,

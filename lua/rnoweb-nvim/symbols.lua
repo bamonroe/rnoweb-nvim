@@ -1,10 +1,15 @@
 local q  = vim.treesitter.query
+local info  = require'rnoweb-nvim.info'
 
 local M = {
   sym = {
     r      = {},
     latex  = {},
     rnoweb = {},
+  },
+  lang_queries = {
+    rnoweb = {"rnoweb", "r", "latex"},
+    latex = {"latex"},
   },
   queries = {
     r      = {},
@@ -289,10 +294,12 @@ M.set_query = function(lang, key, query)
 end
 
 M.get_queries = function(root, bufnr)
-  local lt = M.queries
+
+  -- Get the queries applicable to this filetype
+
   local out = {}
-  for lang, _ in pairs(lt) do
-    for _, k in ipairs(lt[lang]) do
+  for _, lang in pairs(M.lang_queries[info.ft]) do
+    for _, k in ipairs(M.queries[lang]) do
       local name  = k["fn"]
       local query = k["query"]
       query = q.parse_query(lang, query)

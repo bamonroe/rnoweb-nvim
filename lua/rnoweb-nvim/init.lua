@@ -8,6 +8,7 @@ local M = {}
 M.opts = {
   filetypes = {"*.Rnw", "*.tex"},
   tex2latex = true,
+  set_conceal = true,
   setup = false,
 }
 M.auid = vim.api.nvim_create_augroup("rnoweb-nvim-pkg", {
@@ -23,12 +24,15 @@ end
 
 -- Initial setup function
 M.setup = function(opts)
-  local dopts = {
-    filetypes = {"*.Rnw", "*.tex"},
-    tex2latex = true,
-    setup = true,
-  }
-  M.opts = opts and opts or dopts
+  opts = opts and opts or M.opts
+  for k,v in pairs(opts) do
+    M.opts[k] = v
+  end
+  M.opts.setup = true
+
+  if M.opts.set_conceal then
+    vim.o.conceallevel = 2
+  end
 
   -- Optionally force tex files to be recocnized as latex
   if M.opts.tex2latex then
@@ -48,6 +52,8 @@ M.del_marks = function()
   for _, val in pairs(info.ids) do
     v.nvim_buf_del_extmark(info.bufnr, info.ns, val)
   end
+  -- We've deleted the marks, now clear the saved id numbers
+  info.ids = {}
   info["beg_env"] = nil
 end
 
@@ -55,11 +61,12 @@ end
 -- not useful for stand-alone LaTeX
 M.mask_inline = function()
 
+  -- Inline R code will only work with rnoweb queries
   if info.ft ~= "rnoweb" then
     return {}
   end
 
-  -- Clear the current marks
+  -- Get the parser for this buffer
   local parser = vim.treesitter.get_parser(info.bufnr)
   local tree   = parser:parse()
   local root   = tree[1]:root()
@@ -105,6 +112,7 @@ M.mask_inline = function()
 end
 
 -- This is the meaty function that does the latex concealing
+-- Works for rnoweb and latex filetypes
 M.mask_texsym = function()
   local parser = vim.treesitter.get_parser(info.bufnr)
   parser:for_each_tree(function(_, tree)
@@ -126,6 +134,7 @@ end
 -- function writes the latex command names to a file, generates a spell file,
 -- and appends to the spell-lang. This helps with a huge amount of spelling
 -- misses.
+-- I'm hoping to obsolete this function by the recently merged spellsitter functionality
 M.make_spell = function()
   -- Shortcuts
   local parser = vim.treesitter.get_parser(info.bufnr)
@@ -176,53 +185,11 @@ end
 
 -- This is the main function to call
 M.refresh = function()
+    info.set_info()
     M.del_marks()
-    M.mask_inline()
     M.mask_texsym()
+    M.mask_inline()
     M.make_spell()
-end
-
-M.setup = function(opts)
-
-  local dopts = {
-    filetypes = {"*.Rnw", "*.tex"},
-    tex2latex = true,
-  }
-
-  opts = opts and opts or dopts
-
-  local v = vim.api
-  M.auid = v.nvim_create_augroup("rnoweb-nvim-pkg", {
-    clear = true,
-  })
-
-  local tex2latex = function()
-    if vim.bo.filetype == "tex" then
-      vim.pretty_print("changing to latex")
-      vim.bo.filetype = "latex"
-    end
-  end
-
-  -- Optionally force tex files to be recocnized as latex
-  if opts.tex2latex then
-    -- Change tex to latex
-    v.nvim_create_autocmd({"FileType"}, {
-      group = M.auid,
-      pattern = {"*.tex"},
-      callback = tex2latex
-    })
-  end
-
-  v.nvim_create_autocmd({"CursorHold", "BufEnter", "BufWritePost"}, {
-    group = M.auid,
-    pattern = {"*.Rnw", "*.tex"},
-    callback = function()
-      if opts.tex2latex then
-        tex2latex()
-      end
-      require('rnoweb-nvim').refresh()
-    end
-  })
 end
 
 return M
