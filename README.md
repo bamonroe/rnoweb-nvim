@@ -23,7 +23,6 @@ provided that their results are included in a `inline` directory.
 
 ### Improvements
 [ ] - Citation conceal with bibliography lookup and hopefully the anti-conceal functionality. Not doing this before anti-conceal is mainlined.  
-[ ] - Replace the spellfile functionality with spellsitter (coming soon)  
 [ ] - Constant improvements in equation and environment numbering  
 
 # Installation and User Configuration

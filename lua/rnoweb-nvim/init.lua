@@ -130,66 +130,12 @@ M.mask_texsym = function()
 
 end
 
--- Unfortunatly, basically all latex commands show as badly spelled. this
--- function writes the latex command names to a file, generates a spell file,
--- and appends to the spell-lang. This helps with a huge amount of spelling
--- misses.
--- I'm hoping to obsolete this function by the recently merged spellsitter functionality
-M.make_spell = function()
-  -- Shortcuts
-  local parser = vim.treesitter.get_parser(info.bufnr)
-  local author = q.parse_query("latex", "(generic_command (command_name) @cmd)")
-
-  local cmds = {}
-
-  -- Save all the command names in a table
-  parser:for_each_tree(function(_, tree)
-    local ttree = tree:parse()
-    local root  = ttree[1]:root()
-    for _, node, _ in author:iter_captures(root, info.bufnr) do
-      local txt = h.gtext(node)
-      txt = string.sub(txt, 2)
-      cmds[txt] = 1
-    end
-  end)
-
-  -- The words file
-  local fname = "/home/bam/.config/nvim/spell/latex"
-  local lwords = fname .. ".words"
-  local spellfile = fname .. ".utf-8.spl"
-
-  -- Write the command names to a words spell-file
-  h.write_lines(lwords, cmds)
-
-  -- Make a spell file from the words
-  local mks = "silent mkspell! "
-  mks = mks .. spellfile .. " "
-  mks = mks .. lwords
-  vim.cmd(mks)
-
-  -- Get the current spell languages
-  local splang = h.split(vim.o.spelllang, ",")
-
-  -- If latex isn't in the list, add it as an option
-  if not h.isin("latex", splang) then
-    splang[#splang+1] = "latex"
-    local s = ""
-    for _, l in pairs(splang) do
-      s = s .. l .. ","
-    end
-    local val = "silent set spelllang=" .. s
-    vim.cmd(val)
-  end
-
-end
-
 -- This is the main function to call
 M.refresh = function()
     info.set_info()
     M.del_marks()
     M.mask_texsym()
     M.mask_inline()
-    M.make_spell()
 end
 
 return M
