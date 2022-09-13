@@ -37,14 +37,6 @@ table.insert(M.queries.latex, {
   query = "(citation) @cite",
 })
 table.insert(M.queries.latex, {
-  fn    = "begin",
-  query = "(begin) @begin",
-})
-table.insert(M.queries.latex, {
-  fn    = "ref",
-  query = "(label_reference) @label",
-})
-table.insert(M.queries.latex, {
   fn    = "mdelimit",
   query = "(math_delimiter) @math",
 })
@@ -69,6 +61,54 @@ table.insert(M.queries.latex, {
     )
   ]],
 })
+
+table.insert(M.queries.latex, {
+  fn    = "fig_lab_count",
+  query = [[
+    (generic_environment
+      (begin
+        (curly_group_text
+          (text
+            (word) @ename (#eq? @ename "figure") (#set! @ename "ignore" "true")
+          )
+        )
+      )
+      (label_definition
+        (curly_group_text
+          (text) @figlab
+        )
+      )
+    )
+  ]],
+})
+
+table.insert(M.queries.latex, {
+  fn    = "section_count",
+  query = [[
+    (section) @sec
+  ]],
+})
+
+
+table.insert(M.queries.latex, {
+  fn    = "math_count",
+  query = [[
+    (math_environment) @sec
+  ]],
+})
+
+
+table.insert(M.queries.latex, {
+  fn    = "ref",
+  query = [[
+    (label_reference
+      (curly_group_text_list
+        (text)
+      )
+    ) @ref
+  ]],
+})
+
 
 
 -- Sub/superscripts are a bit of a pain to capture

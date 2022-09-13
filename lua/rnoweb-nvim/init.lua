@@ -54,9 +54,7 @@ M.del_marks = function()
     v.nvim_buf_del_extmark(info.bufnr, info.ns, val)
   end
   -- We've deleted the marks, now clear the saved id numbers
-  info.ids = {}
-  info.footnote = 0
-  info["beg_env"] = nil
+  info.reset()
 end
 
 -- This function replaces inline R code with the results of that code

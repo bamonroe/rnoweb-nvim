@@ -8,6 +8,55 @@ local d    = require'rnoweb-nvim.dbug'
 
 local M = {}
 
+-- For simple conceals of a node with a given bit of text
+local nconceal = function(n, text, offsets, range)
+
+  -- Default offsets are 0
+  local off = {
+    bl = 0,
+    el = 0,
+    bc = 0,
+    ec = 0,
+  }
+
+  -- Allow some adjustment
+  if offsets ~= nil then
+    for k, v in pairs(offsets) do
+      off[k] = v
+    end
+  end
+
+
+  -- Get the range of the curly gruoup and conceal it all
+  if range == nil then
+    range  = {n:range()}
+  end
+  local beg_line = range[1] + off.bl
+  local end_line = range[3] + off.el
+  -- As well as the carat or underscore character in the previous node
+  local beg_col = range[2] + off.bc
+  local end_col = range[4] + off.ec
+
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = text
+  }
+
+  local clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
+
+end
+
 local author_year = function(a)
   local out = {}
   for _, v in pairs(a) do
@@ -19,6 +68,29 @@ local author_year = function(a)
     }
   end
   return(out)
+end
+
+local find_type
+find_type = function(n, type, recursive)
+
+  if recursive == nil then
+    recursive = false
+  end
+
+  local res = {}
+  for child, _ in n:iter_children() do
+    local val = child:type()
+    if type == val then
+      table.insert(res, child)
+    end
+    if child:child_count() > 0  and recursive then
+      local nres = find_type(child, type, recursive)
+      for _, nc in pairs(nres) do
+        table.insert(res, nc)
+      end
+    end
+  end
+  return res
 end
 
 -- Format citations nicely
@@ -206,7 +278,7 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
 
 end
 
-M.conceal_cmd = function(lang, node, meta)
+M.conceal_cmd = function(lang, node, _)
 
   local field = "command"
   if lang == "rnoweb" then
@@ -224,131 +296,8 @@ M.conceal_cmd = function(lang, node, meta)
   end
 end
 
--- I'm trying to keep track of the equation numbers above the environments
-M.begin = function(lang, beg_node, meta)
-
-  local cmd_node = beg_node:field("name")[1]:field("text")[1]
-  local name = ts.get_node_text(cmd_node, info.bufnr)
-
-  -- Currently just dealing with equations
-  local v = h.in_tablev(name, {"equation", "align"})
-  if not v  then return(nil) end
-
-  local rname = name
-  name = "math"
-
-  -- Initialize if empty
-  info["beg_env"] = info["beg_env"] == nil and {} or info["beg_env"]
-
-  if info["beg_env"][name] == nil then
-    info["beg_env"][name] = {
-      count = 0,
-    }
-    info["beg_env"]["label"] = {}
-  end
-  --
-  -- Always "math_environment" for equation begins, not always with a label
-  local parent = beg_node:parent()
-
-  -- If we're in an align environment, we need to count the number of line
-  -- breaks in the top-level environment
-  local count = 1
-  if rname == "align" then
-    for n in parent:iter_children() do
-      local nt = n:type()
-      if nt == "generic_command" then
-        local cname = n:field("command")[1]
-        cname = ts.get_node_text(cname, info.bufnr)
-        if cname == "\\\\" then
-          count = count + 1
-        end
-      end
-    end
-  end
-
-  -- Increment
-  local eqcount = info["beg_env"][name]["count"]
-  local label_count = eqcount
-  info["beg_env"][name]["count"] = info["beg_env"][name]["count"] + count
-
-  for n in parent:iter_children() do
-    if n:type() == "label_definition" then
-      label_count = label_count + 1
-      local label = n:field("name")[1]
-      label = label:field("text")[1]
-      label = ts.get_node_text(label, info.bufnr)
-      info["beg_env"]["label"][label] = "" .. label_count .. ""
-    end
-  end
-
-  -- Opening symbol
-  local brange = {beg_node:range()}
-  local text = " Equation"
-  if count > 1 then
-    text = text .. "s "
-    for i = 1,count do
-      if i == count then
-        text = text .. (eqcount + i)
-      else
-        text = text .. (eqcount + i) .. ", "
-      end
-    end
-  else
-    text = text .. " " .. (eqcount + 1)
-  end
-
-  local opts = {
-    end_line = brange[1],
-    virt_text_pos = "eol",
-    virt_text_hide = true,
-    virt_text = {{text, "Conceal"}}
-  }
-
-  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
-    info.bufnr,
-    info.ns,
-    brange[1],
-    brange[4],
-    opts)
-
-end
-
-M.ref = function(lang, node, meta)
-
-  local name = node:field("names")[1]
-  name = name:field("text")[1]
-  name = ts.get_node_text(name, info.bufnr)
-
-  local val = info["beg_env"]["label"][name]
-
-  -- If we haven't got a replacement for this ref, just skip it
-  if val == nil then return nil end
-
-  local beg_line, beg_col, end_line, end_col = node:range()
-
-  local opts = {
-    end_col = end_col,
-    end_line = end_line,
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = val
-  }
-
-  local clen = end_col - beg_col
-
-  h.mc_conceal(
-    info.bufnr,
-    info.ns,
-    beg_line,
-    beg_col,
-    opts,
-    clen
-  )
-
-end
-
 -- Math delimter function
-M.mdelimit = function(lang, node, meta)
+M.mdelimit = function(_, node, _)
 
   local nrange = {node:range()}
 
@@ -415,7 +364,7 @@ M.mdelimit = function(lang, node, meta)
 
 end
 
-M.single_hat = function(lang, node, meta)
+M.single_hat = function(_, node, _)
 
   local little_hats = {}
     little_hats["a"] = "â"
@@ -444,32 +393,9 @@ M.single_hat = function(lang, node, meta)
   local text = h.gtext(child)
 
   local parent = node:parent():parent()
-  local range  = {parent:range()}
 
+  nconceal(parent, little_hats[text])
 
-  local beg_line = range[1]
-  local end_line = range[1]
-
-  local beg_col = range[2]
-  local end_col = range[4]
-
-  local opts = {
-    end_col = end_col,
-    end_line = end_line,
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = little_hats[text]
-  }
-
-  local clen = end_col - beg_col
-  h.mc_conceal(
-    info.bufnr,
-    info.ns,
-    beg_line,
-    beg_col,
-    opts,
-    clen
-  )
 end
 
 local ss_get_res = function(n, kind)
@@ -504,65 +430,34 @@ local ss_get_res = function(n, kind)
 
 end
 
-M.subsuper = function(lang, node, meta)
+M.subsuper = function(_, node, meta)
 
   local kind = meta["kind"]
 
-
-  -- Get the range of the curly gruoup and conceal it all
   local range  = {node:range()}
-  local beg_line = range[1]
-  local end_line = range[1]
-
-  -- As well as the carat or underscore character in the previous node
-  local beg_col = range[2] - 1
-  local end_col = range[4]
+  local offsets = {bc = -1}
 
   local res = ""
   if node:child_count() == 0 then
     res = ss_get_res(node, kind)
     -- There's only 1 character to be under-scored, so only conceal that char and the underscore
-    beg_col = range[4] - 2
+    range[3] = range[4] - 2
+    offsets.bc = 0;
   else
     for child, _ in node:iter_children() do
       res = res .. ss_get_res(child, kind)
     end
   end
 
-  local opts = {
-    end_col = end_col,
-    end_line = end_line,
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = res
-  }
-
-  local clen = end_col - beg_col
-  h.mc_conceal(
-    info.bufnr,
-    info.ns,
-    beg_line,
-    beg_col,
-    opts,
-    clen
-  )
+  nconceal(node, res, offsets, range)
 
 end
 
 M.footnote = function(_, node, _)
 
-  info.footnote = info.footnote + 1
+  info.counts.footnote = info.counts.footnote + 1
 
-  -- Get the range of the curly gruoup and conceal it all
-  local range  = {node:range()}
-  local beg_line = range[1]
-  local end_line = range[1]
-  -- As well as the carat or underscore character in the previous node
-  local beg_col = range[2]
-  local end_col = range[4]
-
-
-  local text = "" .. info.footnote .. ""
+  local text = "" .. info.counts.footnote .. ""
   local kind = "superscript"
   local res = ""
   for letter in text:gmatch(".") do
@@ -571,23 +466,96 @@ M.footnote = function(_, node, _)
     res = res .. letter
   end
 
-  local opts = {
-    end_col = end_col,
-    end_line = end_line,
-    virt_text_pos = "overlay",
-    virt_text_hide = true,
-    conceal = res
-  }
+  nconceal(node, res)
 
-  local clen = end_col - beg_col
-  h.mc_conceal(
-    info.bufnr,
-    info.ns,
-    beg_line,
-    beg_col,
-    opts,
-    clen
-  )
+end
+
+M.fig_lab_count = function(_, node, _)
+  local lab = h.gtext(node)
+  info.counts.figures = info.counts.figures + 1
+  info.lab_numbers[lab] = info.counts.figures
+end
+
+M.section_count = function(_, node, _)
+  info.counts.sections = info.counts.sections + 1
+  local sec = info.counts.sections
+  for c, _ in node:iter_children() do
+    local type = c:type()
+    if type == "label_definition" then
+      local lab = c:field("name")[1]:child(1)
+      lab = h.gtext(lab)
+      info.lab_numbers[lab] = sec
+    end
+  end
+end
+
+M.math_count = function(_, node, _)
+
+  -- What kind of math environment
+  local beg  = node:field("begin")[1]
+  local type = h.gtext(beg:field("name")[1]:child(1))
+
+  -- Align environments are kinda tricky
+  if type == "align" then
+    info.counts.equations = info.counts.equations + 1
+    local ldef = node:child(1)
+    local ctx = ldef
+
+    -- If the first child is a label definition, it gets assigned now,
+    -- all subsequent label definitions are handled in the below loop
+    if ldef:type() == "label_definition" then
+      local lab = h.gtext(ldef:field("name")[1]:child(1))
+      info.lab_numbers[lab] = info.counts.equations
+      ctx = ldef:next_sibling()
+    end
+
+    -- If we hit a line break, we increment the equation number,
+    -- if we hit a label definition, we assigned the label
+    for c, _ in ctx:iter_children() do
+      if c:type() == "generic_command" then
+        local cmd = c:field("command")[1]
+        local v = h.gtext(cmd)
+        -- This was annoying, but the only way I could actuall test for a line
+        -- break command
+        local j = "\\\\"
+        if v == j then
+          info.counts.equations = info.counts.equations + 1
+        end
+
+      elseif c:type() == "label_definition" then
+        local lab = h.gtext(c:field("name")[1]:child(1))
+        info.lab_numbers[lab] = info.counts.equations
+      end
+    end
+
+  -- Equation environments are much easier
+  elseif type == "equation" then
+    info.counts.equations = info.counts.equations + 1
+    local ldef = find_type(node, "label_definition", true)
+    if ldef[1] ~= nil then
+      local lab = h.gtext(ldef[1]:field("name")[1]:child(1))
+      info.lab_numbers[lab] = info.counts.equations
+    end
+
+  end
+
+end
+
+M.ref = function(_, node, _)
+
+  -- Get the "names" of the reference (I'm assuming 1 arg references right
+  -- now), and the first child will disclude the surrounding braces
+  local lab = node:field("names")[1]:child(1)
+  -- This is the reference
+  lab = h.gtext(lab)
+
+  -- See if its in the table
+  local num = info.lab_numbers[lab]
+  num = num and num or lab
+
+  local text = "" .. num .. ""
+
+  nconceal(node, text)
 
 end
 
