@@ -65,8 +65,8 @@ table.insert(M.queries.latex, {
   fn    = "subsuper",
   query = [[
     (inline_formula
-      (text (word) @formula (#match? @formula ".*\^") (#set! @formula "ignore" "true"))
-      (curly_group (text)) @tval (#set! @tval "kind" "superscript")
+      (text (word) @formula (#match? @formula ".*\\^") (#set! @formula "ignore" "true"))
+      (curly_group) @tval (#set! @tval "kind" "superscript")
     )
   ]],
 })
@@ -77,22 +77,11 @@ table.insert(M.queries.latex, {
   query = [[
     (inline_formula
       (text (word) @formula (#match? @formula ".*_") (#set! @formula "ignore" "true"))
-      (curly_group (text)) @tval (#set! @tval "kind" "subscript")
+      (curly_group) @tval (#set! @tval "kind" "subscript")
     )
   ]],
 })
 
-
---table.insert(M.queries.latex, {
---  fn    = "subsuper",
---  query = [[
---    (math_environment
---      (generic_command (command_name) @formula (#match? @formula ".*_") (#set! "ignore" "false"))
---      (curly_group (text)) @tval (#set! "kind" "subscript")
---    )
---  ]],
---})
---
 
 -- Lots of latex replacements
 -- Start with the greeks

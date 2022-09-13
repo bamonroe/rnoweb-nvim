@@ -101,12 +101,11 @@ M.subscript['/'] = 'ˏ'
 M.subscript['('] = '₍'
 M.subscript[')'] = '₎'
 M.subscript['.'] = '.'
--- sub['\\beta\>' ,'ᵦ')
--- sub['\\delta\>','ᵨ')
--- sub['\\phi\>'  ,'ᵩ')
--- sub['\\gamma\>','ᵧ')
--- sub['\\chi\>'  ,'ᵪ')
-
+M.subscript['\\beta'] = 'ᵦ'
+M.subscript['\\delta'] ='ᵨ'
+M.subscript['\\phi']   ='ᵩ'
+M.subscript['\\gamma'] ='ᵧ'
+M.subscript['\\chi']   ='ᵪ'
 
 
 return M
