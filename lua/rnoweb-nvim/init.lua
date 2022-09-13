@@ -133,7 +133,7 @@ M.mask_texsym = function()
         for id, node in pairs(match) do
           -- Get the per-match metadata
           local mmeta = meta and meta or {}
-          if nmatches > 1 then
+          if nmatches > 0 then
             mmeta = meta[id] and meta[id] or {}
           end
           -- Ignore nodes marked with the "ignore" metadata

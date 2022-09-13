@@ -472,66 +472,82 @@ M.single_hat = function(lang, node, meta)
   )
 end
 
+M.ss_get_res = function(n, kind)
+
+  local res = ""
+
+  local type = n:type()
+
+  -- Actually, support only text/word until I can figure out how to remove overlapping extmarks
+  if type == "text" or type == "word" then
+    -- Change the text to superscripts if possible
+    if type == "text" then
+      local text = h.gtext(n)
+      for letter in text:gmatch(".") do
+        -- If the symbol is in the table, use it, otherwise go back to original
+        letter = ss[kind][letter] and ss[kind][letter] or letter
+        res = res .. letter
+      end
+    elseif type == "word" then
+      local text = h.gtext(n)
+      text = string.sub(text, -1)
+      text = ss[kind][text] and ss[kind][text] or "_" .. text
+      res = res .. text
+    else
+      local text = h.gtext(n)
+      local letter = ss[kind][text] and ss[kind][text] or text
+      res = res .. letter
+    end
+  end
+
+  return res
+
+end
+
 M.subsuper = function(lang, node, meta)
 
   local kind = meta["kind"]
 
+
+  -- Get the range of the curly gruoup and conceal it all
+  local range  = {node:range()}
+  local beg_line = range[1]
+  local end_line = range[1]
+
+  -- As well as the carat or underscore character in the previous node
+  local beg_col = range[2] - 1
+  local end_col = range[4]
+
   local res = ""
-  for child, _ in node:iter_children() do
-
-    local type = child:type()
-
-    -- Only suuport text or generic commands here
-    --if type == "text" or type == "generic_command" then
-
-    -- Actually, support only text until I can figure out how to remove overlapping extmarks
-    if type == "text" then
-
-      -- Change the text to superscripts if possible
-      if type == "text" then
-        local text = h.gtext(child)
-        for letter in text:gmatch(".") do
-          -- If the symbol is in the table, use it, otherwise go back to original
-          letter = ss[kind][letter] and ss[kind][letter] or letter
-          res = res .. letter
-        end
-      else
-        local text = h.gtext(child)
-        local letter = ss[kind][text] and ss[kind][text] or text
-        res = res .. letter
-      end
-
-      -- Now get the range of the curly gruoup and conceal it all
-      local range  = {node:range()}
-
-      local beg_line = range[1]
-      local end_line = range[1]
-
-      -- As well as the carat or underscore character in the previous node
-      local beg_col = range[2] - 1
-      local end_col = range[4]
-
-      local opts = {
-        end_col = end_col,
-        end_line = end_line,
-        virt_text_pos = "overlay",
-        virt_text_hide = true,
-        conceal = res
-      }
-
-      local clen = end_col - beg_col
-      h.mc_conceal(
-        info.bufnr,
-        info.ns,
-        beg_line,
-        beg_col,
-        opts,
-        clen
-      )
-
+  if node:child_count() == 0 then
+    res = M.ss_get_res(node, kind)
+    -- There's only 1 character to be under-scored, so only conceal that char and the underscore
+    beg_col = range[4] - 2
+  else
+    for child, _ in node:iter_children() do
+      res = res .. M.ss_get_res(child, kind)
     end
   end
 
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = res
+  }
+
+  local clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
+
 end
+
 
 return M

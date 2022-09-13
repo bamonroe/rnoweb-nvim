@@ -61,6 +61,8 @@ table.insert(M.queries.latex, {
   ]],
 })
 
+-- Sub/superscripts are a bit of a pain to capture
+
 table.insert(M.queries.latex, {
   fn    = "subsuper",
   query = [[
@@ -70,8 +72,6 @@ table.insert(M.queries.latex, {
     )
   ]],
 })
-
-
 table.insert(M.queries.latex, {
   fn    = "subsuper",
   query = [[
@@ -81,6 +81,94 @@ table.insert(M.queries.latex, {
     )
   ]],
 })
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (inline_formula
+      (text (word) @formula (#match? @formula ".*\\^.") (#set! @formula "kind" "superscript"))
+    )
+  ]],
+})
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (inline_formula
+      (text (word) @formula (#match? @formula ".*_.") (#set! @formula "kind" "subscript"))
+    )
+  ]],
+})
+
+
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (math_environment
+      (text (word) @formula (#match? @formula ".*\\^") (#set! @formula "ignore" "true"))
+      (curly_group) @tval (#set! @tval "kind" "superscript")
+    )
+  ]],
+})
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (math_environment
+      (text (word) @formula (#match? @formula ".*_") (#set! @formula "ignore" "true"))
+      (curly_group) @tval (#set! @tval "kind" "subscript")
+    )
+  ]],
+})
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (math_environment
+      (text (word) @formula (#match? @formula ".*\\^.") (#set! @formula "kind" "superscript"))
+    )
+  ]],
+})
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (math_environment
+      (text (word) @formula (#match? @formula ".*_.") (#set! @formula "kind" "subscript"))
+    )
+  ]],
+})
+
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (math_delimiter
+      (text (word) @formula (#match? @formula ".*\\^") (#set! @formula "ignore" "true"))
+      (curly_group) @tval (#set! @tval "kind" "superscript")
+    )
+  ]],
+})
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (math_delimiter
+      (text (word) @formula (#match? @formula ".*_") (#set! @formula "ignore" "true"))
+      (curly_group) @tval (#set! @tval "kind" "subscript")
+    )
+  ]],
+})
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (math_delimiter
+      (text (word) @formula (#match? @formula ".*\\^.") (#set! @formula "kind" "superscript"))
+    )
+  ]],
+})
+table.insert(M.queries.latex, {
+  fn    = "subsuper",
+  query = [[
+    (math_delimiter
+      (text (word) @formula (#match? @formula ".*_.") (#set! @formula "kind" "subscript"))
+    )
+  ]],
+})
+
 
 
 -- Lots of latex replacements
@@ -297,9 +385,9 @@ M.sym.latex["\\nicefrac"] = {"(",  "╱ ", ")"}
 M.sym.latex["\\dfrac"]    = {"(",  "╱ ", ")"}
 
 -- Latex mappings can also include the underscored
-for k, _ in pairs(M.sym.latex) do
+--for k, _ in pairs(M.sym.latex) do
 --  M.sym.latex[k .. "_"] = {M.sym.latex[k][1] .. "_"}
-end
+--end
 
 -- I use this to set project specific replacements
 M.set_sym = function(lang, key, sym)
