@@ -55,6 +55,7 @@ M.del_marks = function()
   end
   -- We've deleted the marks, now clear the saved id numbers
   info.ids = {}
+  info.footnote = 0
   info["beg_env"] = nil
 end
 

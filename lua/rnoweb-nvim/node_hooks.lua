@@ -472,7 +472,7 @@ M.single_hat = function(lang, node, meta)
   )
 end
 
-M.ss_get_res = function(n, kind)
+local ss_get_res = function(n, kind)
 
   local res = ""
 
@@ -520,12 +520,12 @@ M.subsuper = function(lang, node, meta)
 
   local res = ""
   if node:child_count() == 0 then
-    res = M.ss_get_res(node, kind)
+    res = ss_get_res(node, kind)
     -- There's only 1 character to be under-scored, so only conceal that char and the underscore
     beg_col = range[4] - 2
   else
     for child, _ in node:iter_children() do
-      res = res .. M.ss_get_res(child, kind)
+      res = res .. ss_get_res(child, kind)
     end
   end
 
@@ -549,5 +549,46 @@ M.subsuper = function(lang, node, meta)
 
 end
 
+M.footnote = function(_, node, _)
+
+  info.footnote = info.footnote + 1
+
+  -- Get the range of the curly gruoup and conceal it all
+  local range  = {node:range()}
+  local beg_line = range[1]
+  local end_line = range[1]
+  -- As well as the carat or underscore character in the previous node
+  local beg_col = range[2]
+  local end_col = range[4]
+
+
+  local text = "" .. info.footnote .. ""
+  local kind = "superscript"
+  local res = ""
+  for letter in text:gmatch(".") do
+    -- If the symbol is in the table, use it, otherwise go back to original
+    letter = ss[kind][letter] and ss[kind][letter] or letter
+    res = res .. letter
+  end
+
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = res
+  }
+
+  local clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
+
+end
 
 return M

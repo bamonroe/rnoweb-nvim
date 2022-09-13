@@ -61,6 +61,16 @@ table.insert(M.queries.latex, {
   ]],
 })
 
+table.insert(M.queries.latex, {
+  fn    = "footnote",
+  query = [[
+    (generic_command
+     (command_name) @cmd (#eq? @cmd "\\footnote")
+    )
+  ]],
+})
+
+
 -- Sub/superscripts are a bit of a pain to capture
 
 table.insert(M.queries.latex, {
@@ -346,7 +356,7 @@ M.sym.latex['\\}']      = {"}"}
 
 
 -- Non-greeks
-M.sym.latex['\\footnote'] = {"*"}
+--M.sym.latex['\\footnote'] = {"*"}
 M.sym.latex["\\ldots"]    = {"…"}
 M.sym.latex["\\\\"]       = {"↲ "}
 

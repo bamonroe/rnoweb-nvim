@@ -9,6 +9,7 @@ M.set_info = function()
     M.ns    = vim.api.nvim_create_namespace("rnoweb-nvim")
     M.bufnr = bn
     M.ids   = {}
+    M.footnote = 0
     M.iset  = true
   end
 end
