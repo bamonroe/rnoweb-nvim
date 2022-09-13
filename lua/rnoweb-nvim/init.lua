@@ -3,6 +3,7 @@ local sym  = require'rnoweb-nvim.symbols'
 local nh   = require'rnoweb-nvim.node_hooks'
 local h    = require'rnoweb-nvim.helpers'
 local q    = vim.treesitter.query
+local db    = require'rnoweb-nvim.dbug'
 
 local M = {}
 M.opts = {
@@ -114,18 +115,31 @@ end
 -- This is the meaty function that does the latex concealing
 -- Works for rnoweb and latex filetypes
 M.mask_texsym = function()
+
   local parser = vim.treesitter.get_parser(info.bufnr)
   parser:for_each_tree(function(_, tree)
     local ttree = tree:parse()
     local root  = ttree[1]:root()
+
     for _, d in sym.get_queries(root, info.bufnr) do
-      local lang  = d["lang"]
-      local query = d["query"]
-      local cmd   = d["cmd"]
-      for id, node, meta in query do
-        -- Ignore nodes market with the "ignore" metadata
-        if meta["ignore"] == nil or meta["ignore"] == "false" then
-          nh[cmd](lang, node)
+      local lang   = d["lang"]
+      local imatch = d["match"]
+      local cmd    = d["cmd"]
+
+      for _, match, meta in imatch do
+        -- We want to know if there's multiple matches to correctly parse the
+        -- metadata per match
+        local nmatches = h.tlen(match)
+        for id, node in pairs(match) do
+          -- Get the per-match metadata
+          local mmeta = meta and meta or {}
+          if nmatches > 1 then
+            mmeta = meta[id] and meta[id] or {}
+          end
+          -- Ignore nodes marked with the "ignore" metadata
+          if mmeta["ignore"] == nil or mmeta["ignore"] == "false" then
+            nh[cmd](lang, node, mmeta)
+          end
         end
       end
     end

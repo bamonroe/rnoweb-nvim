@@ -61,6 +61,14 @@ M.slen = function(s)
   return count
 end
 
+M.tlen = function(t)
+  local n = 0
+  for _, _ in pairs(t) do
+    n = n + 1
+  end
+  return n
+end
+
 M.ncols = function(lnum)
   local line = vim.api.nvim_buf_get_lines(info.bufnr, lnum, lnum + 1, true)[1]
   local tabstop = vim.api.nvim_get_option("tabstop")

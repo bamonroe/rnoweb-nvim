@@ -53,7 +53,7 @@ table.insert(M.queries.latex, {
   fn    = "single_hat",
   query = [[
     (generic_command
-      (command_name) @cmd (#eq? @cmd "\\hat") (#set! "ignore" "true")
+      (command_name) @cmd (#eq? @cmd "\\hat") (#set! @cmd "ignore" "true")
       (curly_group
         (text) @tval (#any-of? @tval "a" "A" "c" "C" "e" "E" "g" "G" "i" "I" "o" "O" "s" "S" "u" "U" "w" "W" "y" "Y")
       )
@@ -62,26 +62,37 @@ table.insert(M.queries.latex, {
 })
 
 table.insert(M.queries.latex, {
-  fn    = "superscript",
+  fn    = "subsuper",
   query = [[
     (inline_formula
-      (text (word) @formula (#match? @formula ".*\^") (#set! "ignore" "true"))
-      (curly_group (text)) @tval
+      (text (word) @formula (#match? @formula ".*\^") (#set! @formula "ignore" "true"))
+      (curly_group (text)) @tval (#set! @tval "kind" "superscript")
     )
   ]],
 })
 
 
 table.insert(M.queries.latex, {
-  fn    = "subscript",
+  fn    = "subsuper",
   query = [[
     (inline_formula
-      (text (word) @formula (#match? @formula ".*_") (#set! "ignore" "true"))
-      (curly_group (text)) @tval
+      (text (word) @formula (#match? @formula ".*_") (#set! @formula "ignore" "true"))
+      (curly_group (text)) @tval (#set! @tval "kind" "subscript")
     )
   ]],
 })
 
+
+--table.insert(M.queries.latex, {
+--  fn    = "subsuper",
+--  query = [[
+--    (math_environment
+--      (generic_command (command_name) @formula (#match? @formula ".*_") (#set! "ignore" "false"))
+--      (curly_group (text)) @tval (#set! "kind" "subscript")
+--    )
+--  ]],
+--})
+--
 
 -- Lots of latex replacements
 -- Start with the greeks
@@ -298,7 +309,7 @@ M.sym.latex["\\dfrac"]    = {"(",  "╱ ", ")"}
 
 -- Latex mappings can also include the underscored
 for k, _ in pairs(M.sym.latex) do
-  M.sym.latex[k .. "_"] = {M.sym.latex[k][1] .. "_"}
+--  M.sym.latex[k .. "_"] = {M.sym.latex[k][1] .. "_"}
 end
 
 -- I use this to set project specific replacements
@@ -339,7 +350,7 @@ M.get_queries = function(root, bufnr)
       out[#out+1] = {
         cmd   = name,
         lang  = lang,
-        query = query:iter_captures(root, bufnr)
+        match = query:iter_matches(root, bufnr)
       }
     end
   end
