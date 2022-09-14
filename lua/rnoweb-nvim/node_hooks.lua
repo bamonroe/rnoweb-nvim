@@ -441,7 +441,7 @@ M.subsuper = function(_, node, meta)
   if node:child_count() == 0 then
     res = ss_get_res(node, kind)
     -- There's only 1 character to be under-scored, so only conceal that char and the underscore
-    range[3] = range[4] - 2
+    range[2] = range[4] - 2
     offsets.bc = 0;
   else
     for child, _ in node:iter_children() do
