@@ -42,6 +42,13 @@ table.insert(M.queries.latex, {
 })
 
 table.insert(M.queries.latex, {
+  fn    = "text_mode",
+  query = [[
+    (text_mode) @cmd
+  ]],
+})
+
+table.insert(M.queries.latex, {
   fn    = "single_hat",
   query = [[
     (generic_command

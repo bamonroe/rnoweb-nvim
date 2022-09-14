@@ -296,6 +296,23 @@ M.conceal_cmd = function(lang, node, _)
   end
 end
 
+M.text_mode = function(_, node, _)
+
+  local range  = {node:range()}
+  local end_col = {node:child(1):range()}
+  end_col = end_col[2]
+
+  -- 1 beg_line
+  -- 2 beg_col
+  -- 3 end_line
+  -- 4 end_col
+
+  range[3] = range[1]
+  range[4] = end_col + 0
+
+  nconceal(node, "", {}, range)
+end
+
 -- Math delimter function
 M.mdelimit = function(_, node, _)
 
