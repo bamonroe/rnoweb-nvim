@@ -489,55 +489,139 @@ M.section_count = function(_, node, _)
   end
 end
 
+---------
+-- Some helper functions for math count
+--------
+
+-- Check if the node is the command "\\"
+local line_end_check = function(n)
+  local res = false
+  if n:type() == "generic_command" then
+    local cmd = n:field("command")[1]
+    local v = h.gtext(cmd)
+    -- This was annoying, but the only way I could actuall test for a line
+    -- break command
+    local j = "\\\\"
+    res = v == j
+  end
+  return res
+end
+
+-- Increment the equation number in the main table, and collect the result in
+-- the local table
+local inc_eqs = function(eqs)
+  info.counts.equations = info.counts.equations + 1
+  table.insert(eqs, info.counts.equations)
+  return eqs
+end
+
+-- Add the label to label counter
+local add_lab = function(set, lab)
+  info.lab_numbers[lab] = info.counts[set]
+end
+
+-- Get the label from a label node
+local get_lab = function(n)
+  return h.gtext(n:field("name")[1]:child(1))
+end
+
 M.math_count = function(_, node, _)
 
   -- What kind of math environment
   local beg  = node:field("begin")[1]
   local type = h.gtext(beg:field("name")[1]:child(1))
+  local eqs  = {}
 
   -- Align environments are kinda tricky
   if type == "align" then
-    info.counts.equations = info.counts.equations + 1
-    local ldef = node:child(1)
-    local ctx = ldef
+    eqs = inc_eqs(eqs)
+
+    -- Get past the begin environment
+    local ctx = node:child(1)
 
     -- If the first child is a label definition, it gets assigned now,
     -- all subsequent label definitions are handled in the below loop
-    if ldef:type() == "label_definition" then
-      local lab = h.gtext(ldef:field("name")[1]:child(1))
-      info.lab_numbers[lab] = info.counts.equations
-      ctx = ldef:next_sibling()
+    if ctx:type() == "label_definition" then
+      local lab = get_lab(ctx)
+      add_lab("equations", lab)
+      ctx = ctx:next_sibling()
     end
 
     -- If we hit a line break, we increment the equation number,
     -- if we hit a label definition, we assigned the label
-    for c, _ in ctx:iter_children() do
-      if c:type() == "generic_command" then
-        local cmd = c:field("command")[1]
-        local v = h.gtext(cmd)
-        -- This was annoying, but the only way I could actuall test for a line
-        -- break command
-        local j = "\\\\"
-        if v == j then
-          info.counts.equations = info.counts.equations + 1
-        end
+    while true do
 
-      elseif c:type() == "label_definition" then
-        local lab = h.gtext(c:field("name")[1]:child(1))
-        info.lab_numbers[lab] = info.counts.equations
+      -- If at any point you have consequtive equations in an align
+      -- environment, they all get subsumed under a parent "text" node
+      if ctx:type() == "text" then
+        for c, _ in ctx:iter_children() do
+          if line_end_check(c) then
+            eqs = inc_eqs(eqs)
+          elseif c:type() == "label_definition" then
+            local lab = get_lab(c)
+            add_lab("equations", lab)
+          end
+        end
+      -- But you can have environments in an align node too, e.g. a split environment
+      -- So you need to cycle through siblings and increment as needed
+      elseif ctx:type() == "label_definition" then
+        local lab = get_lab(ctx)
+        add_lab("equations", lab)
+      elseif line_end_check(ctx) then
+        eqs = inc_eqs(eqs)
+      elseif ctx:type() == "end" then
+        break
+
       end
+
+      ctx = ctx:next_sibling()
     end
 
   -- Equation environments are much easier
   elseif type == "equation" then
-    info.counts.equations = info.counts.equations + 1
-    local ldef = find_type(node, "label_definition", true)
-    if ldef[1] ~= nil then
-      local lab = h.gtext(ldef[1]:field("name")[1]:child(1))
-      info.lab_numbers[lab] = info.counts.equations
+    eqs = inc_eqs(eqs)
+    local ctx = find_type(node, "label_definition", true)[1]
+    if ctx ~= nil then
+      local lab = get_lab(ctx)
+      add_lab("equations", lab)
     end
-
   end
+
+  local neqs = h.tlen(eqs)
+  -- Virtual text to apply next to the equation environments indicating
+  -- equation numbers
+  local text
+  if neqs == 1 then
+    text = "Equation " .. eqs[1]
+  elseif neqs > 1 then
+    text = "Equations "
+    for _, v in pairs(eqs) do
+      text = text .. v .. ", "
+    end
+    text = text:sub(1, -3)
+  else
+    return(nil)
+  end
+  text = "  " .. text
+
+  local range = {node:range()}
+  local beg_line = range[1]
+  local beg_col  = range[2]
+  local end_line = range[3]
+
+  local nopts = {
+    end_row = end_line,
+    virt_text = {{text, "Conceal"}},
+    virt_text_pos = "eol",
+    virt_text_hide = true,
+  }
+
+  info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    nopts)
 
 end
 

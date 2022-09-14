@@ -1,5 +1,6 @@
 local ts   = vim.treesitter
 local info = require'rnoweb-nvim.info'
+local db   = require'rnoweb-nvim.dbug'
 
 local M = {}
 
@@ -131,6 +132,7 @@ M.gtext = function(node)
 end
 
 M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
+
 
   local conceal_text = opts["conceal"]
   local conceal_len  = M.slen(conceal_text)
