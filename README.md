@@ -70,21 +70,21 @@ note that fields 2+ can only be of length 2 or less.
 
 # Screenshots
 
-Some text from an article I'm writing showing off the citation replacement:
+Some text from an article I'm writing showing off the citation replacement and footnote counting:
 
 Without Plugin:  
-![Without Plugin](citation_noplugin.png)
+![Without Plugin](readme_media/citation_noplugin.png)
 
 With Plugin:  
-![With Plugin](citation_plugin.png)
+![With Plugin](readme_media/citation_plugin.png)
 
 
 Some equation environments from the same article. Note the attempt at counting
 equation numbers and displaying the numbers in virtual text.
 
 Without Plugin:  
-![Without Plugin](math_noplugin.png)
+![Without Plugin](readme_media/math_noplugin.png)
 
 With Plugin:  
-![With Plugin](math_plugin.png)
+![With Plugin](readme_media/math_plugin.png)
 
