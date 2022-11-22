@@ -3,7 +3,6 @@ local sym  = require'rnoweb-nvim.symbols'
 local nh   = require'rnoweb-nvim.node_hooks'
 local h    = require'rnoweb-nvim.helpers'
 local q    = vim.treesitter.query
-local db    = require'rnoweb-nvim.dbug'
 
 local M = {}
 M.opts = {

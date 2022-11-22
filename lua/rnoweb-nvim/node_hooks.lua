@@ -452,7 +452,23 @@ M.subsuper = function(_, node, meta)
   local kind = meta["kind"]
 
   local range  = {node:range()}
+  local rbeg   = {range[1], range[2]}
   local offsets = {bc = -1}
+
+  -- Attempt to stop sub/superscripts from being applied to
+  -- anything beyond the immediate curly group
+  local prev   = node:prev_sibling()
+  if prev == nil then
+    return({})
+  end
+  local prange = {prev:range()}
+  local pend   = {prange[3], prange[4]}
+
+  -- Check to see if the curly group is immediately after the previous sibling
+  local is_immediate = rbeg[1] == pend[1] and rbeg[2] == pend[2]
+  if not is_immediate then
+    return({})
+  end
 
   local res = ""
   if node:child_count() == 0 then

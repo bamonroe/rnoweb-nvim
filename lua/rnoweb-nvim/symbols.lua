@@ -415,6 +415,7 @@ M.sym.latex['\\,']     = {" "}
 M.sym.latex['\\:']     = {" "}
 M.sym.latex['\\>']     = {" "}
 M.sym.latex['\\space'] = {" "}
+M.sym.latex['\\ ']     = {" "}
 M.sym.latex['\\!']     = {""}
 
 -- Hide the escaping backslash with some
