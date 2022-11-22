@@ -138,16 +138,19 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
   local conceal_len  = M.slen(conceal_text)
   local conceal_utf8 = M.gmatch(conceal_text)
 
+  opts["hl_group"] = opts["hl_group"] and opts["hl_group"] or "Conceal"
+
   local padding = node_len - conceal_len
 
   -- Firstly, conceal the padding
   local nopts = {
     end_line       = opts["end_line"],
     end_col        = beg_col + padding,
-    virt_text      = {{'', "Conceal"}},
+    virt_text      = {{'', opts["hl_group"]}},
     virt_text_pos  = "overlay",
     virt_text_hide = true,
     conceal        = '',
+--    hl_group       = opts["hl_group"],
   }
 
   if padding > -1 then
@@ -172,7 +175,7 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
     nopts = {
       end_line       = end_line,
       end_col        = end_col,
-      virt_text      = {{vtext, "Conceal"}},
+      virt_text      = {{vtext, opts["hl_group"]}},
       virt_text_pos  = pos,
       virt_text_hide = true,
       hl_group       = opts["hl_group"],

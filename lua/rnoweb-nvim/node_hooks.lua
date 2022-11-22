@@ -4,12 +4,15 @@ local sym  = require'rnoweb-nvim.symbols'
 local h    = require'rnoweb-nvim.helpers'
 local info = require'rnoweb-nvim.info'
 local ss   = require'rnoweb-nvim.super_list'
-local d    = require'rnoweb-nvim.dbug'
 
 local M = {}
 
 -- For simple conceals of a node with a given bit of text
-local nconceal = function(n, text, offsets, range)
+local nconceal = function(n, tinfo, offsets, range)
+
+  tinfo = tinfo["text"] and tinfo or {text = tinfo}
+  local text = tinfo["text"]
+  local higroup = tinfo["hi"] and tinfo["hi"] or "Conceal"
 
   -- Default offsets are 0
   local off = {
@@ -26,7 +29,6 @@ local nconceal = function(n, text, offsets, range)
     end
   end
 
-
   -- Get the range of the curly gruoup and conceal it all
   if range == nil then
     range  = {n:range()}
@@ -42,7 +44,8 @@ local nconceal = function(n, text, offsets, range)
     end_line = end_line,
     virt_text_pos = "overlay",
     virt_text_hide = true,
-    conceal = text
+    conceal = text,
+    hl_group = higroup,
   }
 
   local clen = end_col - beg_col
@@ -150,7 +153,7 @@ M.citation = function(lang, node, meta)
 
   local opts = {
     end_col = c1,
-    hl_group = "TSTextReference",
+    hl_group = "@text.reference",
     virt_text_pos = "overlay",
     virt_text_hide = true,
     conceal = display
@@ -219,7 +222,8 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
     end_line = end_line,
     virt_text_pos = "overlay",
     virt_text_hide = true,
-    conceal = text[1]
+    conceal = text[1],
+    hl_group = "@function"
   }
 
   h.mc_conceal(
@@ -261,7 +265,8 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
       end_line = end_line,
       virt_text_pos = "overlay",
       virt_text_hide = true,
-      conceal = text
+      conceal = text,
+      hl_group = "@function"
     }
 
     clen = end_col - beg_col
@@ -672,7 +677,12 @@ M.ref = function(_, node, _)
 
   local text = "" .. num .. ""
 
-  nconceal(node, text)
+  local tinfo = {
+    text = text,
+    hi = "@text.reference"
+  }
+
+  nconceal(node, tinfo)
 
 end
 
