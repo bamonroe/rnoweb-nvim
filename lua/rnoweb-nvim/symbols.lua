@@ -1,3 +1,4 @@
+local ts = vim.treesitter
 local q  = vim.treesitter.query
 local info  = require'rnoweb-nvim.info'
 
@@ -473,9 +474,52 @@ M.set_query = function(lang, key, query)
   M.sym[lang][key] = query
 end
 
+
+-- Sometimes I define new macros that are just text shortcuts
+-- Let's find those newcommands and define them as simple conceals
+local get_inline_text_macros = function(root, bufnr)
+
+  local query = [[
+    (new_command_definition
+      (curly_group_command_name
+        (command_name) @cname
+      )
+      (curly_group
+        (text) @text
+      )
+    )
+  ]]
+  query = q.parse("latex", query)
+
+  for _, match, _ in query:iter_matches(root, bufnr) do
+    local key = ""
+    for id, node in pairs(match) do
+      if id == 1 then
+        key = ts.get_node_text(node, 0)
+        M.sym.latex[key] = {}
+      else
+        local val = ts.get_node_text(node, 0)
+
+        local klen = string.len(key)
+        local vlen = string.len(val)
+
+        if vlen > klen then
+          val = string.sub(val, 1, klen)
+        end
+
+        -- I'm making this two arguments to get rid of possible braces
+        M.sym.latex[key] = {val, ""}
+      end
+    end
+  end
+
+end
+
+-- Get the queries applicable to this filetype
 M.get_queries = function(root, bufnr)
 
-  -- Get the queries applicable to this filetype
+  -- Get any inline latex macros
+  get_inline_text_macros(root, bufnr)
 
   local out = {}
   for _, lang in pairs(M.lang_queries[info.ft]) do

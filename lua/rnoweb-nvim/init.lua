@@ -153,4 +153,15 @@ M.refresh = function()
     M.mask_inline()
 end
 
+--[[
+M.test = function()
+  vim.print('in test')
+  local parser = vim.treesitter.get_parser(info.bufnr, "latex")
+  local tree   = parser:parse()
+  local root   = tree[1]:root()
+  sym.get_inline_text_macros(root, info.bufnr)
+
+end
+--]]
+
 return M
