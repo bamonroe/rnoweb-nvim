@@ -17,7 +17,7 @@ M.auid = vim.api.nvim_create_augroup("rnoweb-nvim-pkg", {
 
 M.tex2latex = function()
   if vim.bo.filetype == "tex" then
-    vim.pretty_print("changing to latex")
+    vim.print("changing to latex")
     vim.bo.filetype = "latex"
   end
 end
@@ -70,7 +70,7 @@ M.mask_inline = function()
   local tree   = parser:parse()
   local root   = tree[1]:root()
 
-  local inline = q.parse_query("rnoweb", "(rinline (renv_content) @inline_content)")
+  local inline = q.parse("rnoweb", "(rinline (renv_content) @inline_content)")
 
   local count = 0
   for _, match, _ in inline:iter_matches(root, info.bufnr) do

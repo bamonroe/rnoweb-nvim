@@ -108,9 +108,9 @@ M.citation = function(lang, node, meta)
   local is_paren = text:match("^\\parencite") and true or false
 
   -- The query for the author
-  local kq = q.parse_query(lang, "(curly_group_text_list (text) @keys )")
+  local kq = q.parse(lang, "(curly_group_text_list (text) @keys )")
   -- The query for any pre-notes
-  local pq = q.parse_query(lang, "(brack_group (text) @prenote )")
+  local pq = q.parse(lang, "(brack_group (text) @prenote )")
 
   local keys = {}
   for _, v in kq:iter_captures(node, info.bufnr) do
@@ -431,20 +431,31 @@ local ss_get_res = function(n, kind)
     -- Change the text to superscripts if possible
     if type == "text" then
       local text = h.gtext(n)
+      local lcount = 1
       for letter in text:gmatch(".") do
         -- If the symbol is in the table, use it, otherwise go back to original
-        letter = ss[kind][letter] and ss[kind][letter] or letter
-        res = res .. letter
+        local luse = ss[kind][letter] and ss[kind][letter] or letter
+        if luse == letter and lcount == 1 then
+          luse = "_" .. luse
+        end
+        res = res .. luse
+        lcount = lcount + 1
       end
     elseif type == "word" then
       local text = h.gtext(n)
       text = string.sub(text, -1)
-      text = ss[kind][text] and ss[kind][text] or "_" .. text
-      res = res .. text
+      local tuse = ss[kind][text] and ss[kind][text] or "_" .. text
+      if text == tuse then
+        tuse = "_" .. tuse
+      end
+      res = res .. tuse
     else
       local text = h.gtext(n)
-      local letter = ss[kind][text] and ss[kind][text] or text
-      res = res .. letter
+      local luse = ss[kind][text] and ss[kind][text] or text
+      if text == luse then
+        luse = "_" .. luse
+      end
+      res = res .. luse
     end
   end
 

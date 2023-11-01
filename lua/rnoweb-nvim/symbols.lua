@@ -394,7 +394,7 @@ M.sym.latex['\\ln']          = {"ln"}
 M.sym.latex['\\exp']         = {"ℯ"}
 M.sym.latex['\\forall']      = {"∀"}
 M.sym.latex['\\exists']      = {"∃"}
-M.sym.latex['\\sqrt']        = {"√", "᳒"}
+M.sym.latex['\\sqrt']        = {"√"}
 
 M.sym.latex['\\lbrace'] = {"{"}
 M.sym.latex['\\rbrace'] = {"}"}
@@ -429,6 +429,7 @@ M.sym.latex['\\textcite']     = {""}
 M.sym.latex['\\parencite']    = {""}
 M.sym.latex['\\left']         = {""}
 M.sym.latex['\\right']        = {""}
+M.sym.latex['\\textbf']       = {"", ""}
 
 -- Commands with arguments
 M.sym.latex["\\enquote"]  = {"“", "”"}
@@ -481,7 +482,7 @@ M.get_queries = function(root, bufnr)
     for _, k in ipairs(M.queries[lang]) do
       local name  = k["fn"]
       local query = k["query"]
-      query = q.parse_query(lang, query)
+      query = q.parse(lang, query)
       out[#out+1] = {
         cmd   = name,
         lang  = lang,
