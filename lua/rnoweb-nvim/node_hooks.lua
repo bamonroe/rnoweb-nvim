@@ -188,7 +188,16 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
   -- Number of argument groups
   local nargs = #arg_nodes
 
-  local text = sym.get_sym_text(lang, cmd_name)
+  -- This bit allows us to totally overwrite the command and all arguments if the "txt" field is present
+  -- This will only happen if this cmd_name has an associated function to call to determine the text
+  local text = sym.get_sym_text(lang, cmd_name, node)
+  if text ~= nil then
+    if text["txt"] ~= nil then
+      text = text["txt"]
+      cmd_range[4] = node_range[4]
+    end
+  end
+
   local ntext = #text
 
   -- Get the table of ranges for args
@@ -243,6 +252,9 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
   beg_line = node_range[1]
   beg_col  = node_range[2]
 
+
+  local ftext = text
+
   for i = 1,nargs do
 
     beg_line = arg_ranges[i][3]
@@ -256,9 +268,7 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
       end_col  = arg_ranges[i][4]
     end
 
-
-    text = sym.get_sym_text(lang, cmd_name)
-    text = text[i + 1]
+    text = ftext[i + 1]
 
     -- Opening symbol
     opts = {
@@ -297,7 +307,7 @@ M.conceal_cmd = function(lang, node, _)
 
   local cmd_name = ts.get_node_text(cmd_node, info.bufnr)
 
-  local text = sym.get_sym_text(lang, cmd_name)
+  local text = sym.get_sym_text(lang, cmd_name, node)
   if text ~= nil then
     conceal_cmd_fn(lang, node, cmd_name)
   end

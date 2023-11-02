@@ -1,4 +1,4 @@
-local M = {superscript = {}, subscript = {}}
+local M = {superscript = {}, subscript = {}, diacritics = {}}
 M.superscript["0"] = '⁰'
 M.superscript["1"] = '¹'
 M.superscript["2"] = '²'
@@ -106,6 +106,136 @@ M.subscript['\\delta'] ='ᵨ'
 M.subscript['\\phi']   ='ᵩ'
 M.subscript['\\gamma'] ='ᵧ'
 M.subscript['\\chi']   ='ᵪ'
+
+-- diacritics
+--[[
+
+`{}
+'{}
+^{}
+"{}
+H{}
+~{}
+c{}
+k{}
+l{}
+={}
+b{}
+.{}
+d{}
+r{}
+u{}
+v{}
+t{}
+o{}
+i{}
+
+--]]
+
+M.diacritics["a"] = {
+  ["\\`"] = "à",
+  ["\\'"] = "á",
+  ["\\^"] = "â",
+  ["\\~"] = "ã",
+  ['\\"'] = "ä",
+  ["\\r"] = "å",
+}
+
+M.diacritics["c"] = {
+  ["\\'"] = "ć",
+  ["\\^"] = "ĉ",
+  ["\\."] = "ċ",
+  ["\\c"] = "ç",
+  ['\\v'] = "č",
+}
+
+M.diacritics["d"] = {
+  ["\\'"] = "ď",
+}
+
+M.diacritics["e"] = {
+  ["\\`"] = "è",
+  ["\\'"] = "é",
+  ["\\^"] = "ê",
+  ['\\"'] = "ë",
+  ['\\.'] = "ė",
+  ['\\='] = "ē",
+  ['\\c'] = "ę",
+  ['\\u'] = "ĕ",
+  ['\\v'] = "ě",
+}
+
+M.diacritics["g"] = {
+  ["\\'"] = "ģ",
+  ["\\^"] = "ĝ",
+  ['\\.'] = "ġ",
+  ['\\u'] = "ğ",
+}
+
+M.diacritics["h"] = {
+  ["\\^"] = "ĥ",
+  ['\\='] = "ħ",
+}
+
+M.diacritics["i"] = {
+  ["\\`"] = "ì",
+  ["\\'"] = "í",
+  ["\\^"] = "î",
+  ['\\"'] = "ï",
+  ['\\~'] = "ĩ",
+  ['\\='] = "ī",
+  ['\\c'] = "į",
+  ['\\u'] = "ĭ",
+  ['\\i'] = "ı",
+}
+
+M.diacritics["j"] = {
+  ["\\^"] = "ĵ",
+}
+
+M.diacritics["l"] = {
+  ["\\`"] = "ļ",
+  ["\\'"] = "ĺ",
+  ['\\o'] = "ł",
+  ['\\.'] = "ŀ",
+}
+
+M.diacritics["n"] = {
+  ["\\~"] = "ñ",
+}
+
+M.diacritics["o"] = {
+  ["\\`"] = "ò",
+  ["\\'"] = "ó",
+  ["\\^"] = "ô",
+  ["\\~"] = "õ",
+  ['\\"'] = "ö",
+  ['\\o'] = "ø",
+}
+
+M.diacritics["u"] = {
+  ["\\`"] = "ù",
+  ["\\'"] = "ú",
+  ["\\^"] = "û",
+  ['\\"'] = "ü",
+}
+
+M.diacritics["y"] = {
+  ["\\`"] = "ý",
+  ['\\"'] = "ÿ",
+}
+
+M.get_diacritic = function(cmd, txt, node)
+  -- If we're in this command, we already know exactly where the thing we want to use is
+  local nt = vim.treesitter.get_node_text(node:child(1):child(1), 0)
+  if M.diacritics[nt] ~= nil then
+    if M.diacritics[nt][cmd] ~= nil then
+      local val = {txt = {M.diacritics[nt][cmd]}, full = true}
+      return val
+    end
+  end
+  return txt
+end
 
 
 return M

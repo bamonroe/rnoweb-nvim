@@ -1,6 +1,7 @@
 local ts = vim.treesitter
 local q  = vim.treesitter.query
 local info  = require'rnoweb-nvim.info'
+local super = require'rnoweb-nvim.super_list'
 
 local M = {
   sym = {
@@ -395,6 +396,13 @@ M.sym.latex['\\forall']      = {{"∀"}}
 M.sym.latex['\\exists']      = {{"∃"}}
 M.sym.latex['\\sqrt']        = {{"√"}}
 
+M.sym.latex['\\cos']        = {{"cos"}}
+M.sym.latex['\\tan']        = {{"tan"}}
+M.sym.latex['\\sin']        = {{"sin"}}
+M.sym.latex['\\arccos']     = {{"arccos"}}
+M.sym.latex['\\arctan']     = {{"arctan"}}
+M.sym.latex['\\arcsin']     = {{"arcsin"}}
+
 M.sym.latex['\\lbrace'] = {{"{"}}
 M.sym.latex['\\rbrace'] = {{"}"}}
 M.sym.latex['\\{']      = {{"{"}}
@@ -441,7 +449,10 @@ M.sym.latex["\\begin"]    = {{"[",  "]"}}
 M.sym.latex["\\frac"]     = {{"(",  "╱ ", ")"}}
 M.sym.latex["\\nicefrac"] = {{"(",  "╱ ", ")"}}
 M.sym.latex["\\dfrac"]    = {{"(",  "╱ ", ")"}}
-M.sym.latex["\\'"]        = {{"",  ""}}
+
+-- These commands look to replace the full command + text
+M.sym.latex["\\'"] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\"'] = {txt = {"",  ""}, fn = super.get_diacritic}
 
 -- Latex mappings can also include the underscored
 --for k, _ in pairs(M.sym.latex) do
@@ -453,7 +464,6 @@ M.set_sym = function(lang, key, sym)
   if M.sym[lang] == nil then
     M.sym[lang] = {}
   end
-
   M.sym[lang][key] = sym
 end
 
@@ -463,9 +473,19 @@ M.get_sym_text = function(lang, cmd, node)
     return nil
   end
   local cdict = M.sym[lang][cmd]
-  if #cdict == 1 or cdict["fn"] == nil then
+  local cfn   = cdict["fn"]
+  local text  = cdict["txt"]
+
+  -- If no function is defined, then return the first element as the text table
+  if cfn == nil then
     return cdict[1]
   end
+
+  local new_text = cfn(cmd, text, node)
+
+  return new_text
+
+
 end
 
 M.set_query = function(lang, key, query)
