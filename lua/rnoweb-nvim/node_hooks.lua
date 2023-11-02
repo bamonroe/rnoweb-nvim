@@ -188,7 +188,7 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
   -- Number of argument groups
   local nargs = #arg_nodes
 
-  local text = sym.sym[lang][cmd_name]
+  local text = sym.get_sym_text(lang, cmd_name)
   local ntext = #text
 
   -- Get the table of ranges for args
@@ -257,7 +257,8 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
     end
 
 
-    text = sym.sym[lang][cmd_name][i + 1]
+    text = sym.get_sym_text(lang, cmd_name)
+    text = text[i + 1]
 
     -- Opening symbol
     opts = {
@@ -296,7 +297,8 @@ M.conceal_cmd = function(lang, node, _)
 
   local cmd_name = ts.get_node_text(cmd_node, info.bufnr)
 
-  if sym.sym[lang][cmd_name] ~= nil then
+  local text = sym.get_sym_text(lang, cmd_name)
+  if text ~= nil then
     conceal_cmd_fn(lang, node, cmd_name)
   end
 end
@@ -331,10 +333,11 @@ M.mdelimit = function(_, node, _)
   local ldelim = h.gtext(lchild)
   local rdelim = h.gtext(rchild)
 
-  local s = sym.sym.latex
+  local ldelim_d = sym.get_sym_text("latex", ldelim)
+  local rdelim_d = sym.get_sym_text("latex", rdelim)
 
-  ldelim = s[ldelim] ~= nil and s[ldelim][1] or ldelim
-  rdelim = s[rdelim] ~= nil and s[rdelim][1] or rdelim
+  ldelim = ldelim_d ~= nil and ldelim_d[1] or ldelim
+  rdelim = rdelim_d ~= nil and rdelim_d[1] or rdelim
 
   local beg_line = nrange[1]
   local end_line = lrange[1]
