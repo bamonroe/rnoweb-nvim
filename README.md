@@ -11,19 +11,25 @@ I created it). In particular, inline code segments are replaced in-document
 provided that their results are included in a `inline` directory.
 
 ### Goals
-[🗸] - Be fast. This means using treesitter to do the heavy lifting  
-[🗸] - Multi-character conceal  
-[🗸] - Work with Rnoweb or stand-alone Latex  
-[🗸] - Conceal latex symbols and provide interface for users to specify their own conceals  
-[🗸] - Basic citation conceal  
-[🗸] - Inline code substitution for rnoweb  
-[x] - Equation numbering  
-[ ] - Figure numbering  
-[ ] - General environment numbering  
+- Be fast. This means using treesitter to do the heavy lifting  
+- Multi-character conceal  
+- Work with Rnoweb or stand-alone Latex  
+- Conceal latex symbols and provide interface for users to specify their own conceals  
+
+### Current Functionality
+- Basic citation conceal  
+- Inline code substitution for rnoweb  
+- Equation numbering  
+- Figure numbering  
+- Footnote numbering  
+- Diacritic replacement  
+- Replacement of in document text macros (`\newcommand`'s where the result of the command is
+only text) 
 
 ### Improvements
-[ ] - Citation conceal with bibliography lookup and hopefully the anti-conceal functionality. Not doing this before anti-conceal is mainlined.  
-[ ] - Constant improvements in equation and environment numbering  
+- Citation conceal with bibliography lookup and hopefully the anti-conceal functionality. Not doing this before anti-conceal is mainlined.  
+- Constant improvements in equation and environment numbering  
+- General environment numbering  
 
 # Installation and User Configuration
 
