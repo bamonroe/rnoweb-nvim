@@ -363,6 +363,7 @@ M.sym.latex['\\parencite']    = {{""}}
 M.sym.latex['\\left']         = {{""}}
 M.sym.latex['\\right']        = {{""}}
 M.sym.latex['\\textbf']       = {{"", ""}}
+M.sym.latex['\\mathrm']       = {{"", ""}}
 
 -- Commands with arguments
 M.sym.latex["\\enquote"]  = {{"“", "”"}}
