@@ -23,8 +23,9 @@ provided that their results are included in a `inline` directory.
 - Figure numbering  
 - Footnote numbering  
 - Diacritic replacement  
-- Replacement of in document text macros (`\newcommand`'s where the result of the command is
-only text) 
+- Subscript/superscripts  
+- Replacement of in document text macros (`\newcommand`'s where the result of the command is only text)  
+- Lots of pre-defined conceals for common commands  
 
 ### Improvements
 - Citation conceal with bibliography lookup and hopefully the anti-conceal functionality. Not doing this before anti-conceal is mainlined.  
