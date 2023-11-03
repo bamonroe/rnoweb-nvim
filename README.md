@@ -43,21 +43,26 @@ use { 'bamonroe/rnoweb-nvim',
   requires = {
     'nvim-lua/plenary.nvim'
   },
-  config = function()  
-		local rnw = require('rnoweb-nvim')
-		rnw.setup()
-		-- Below is user-specific, put your own replacements here
-		rnw.symbols.set_sym("latex", "\\gi",    {"g⁻¹"})
-		rnw.symbols.set_sym("latex", "\\@",     {""})
-		rnw.symbols.set_sym("latex", '\\CE',    {"CE"})
-		rnw.symbols.set_sym("latex", '\\CS',    {"CS"})
-		rnw.symbols.set_sym("latex", '\\Pr',    {"Pr"})
-		rnw.symbols.set_sym("latex", '\\pr',    {"Pr(", ")"})
-		rnw.symbols.set_sym("latex", "\\email", {"✉ :", ""})
-		rnw.symbols.set_sym("latex", "\\gbar",  {"(",   " ︳", ")"})
-		rnw.symbols.set_sym("latex", "\\gbar*", {"",    " ︳", ""})
+  ft = {'rnoweb', "latex", "tex"},
+  dependencies = {
+    'nvim-lua/plenary.nvim'
+  },
+  config = function()
+    require('rnoweb-nvim').setup()
 
-	end
+    -- Set some of my own symbols that are likely not in anyone else's docs
+    local sym = require('rnoweb-nvim.symbols')
+    sym.set_sym("latex", "\\gi",    {"g⁻¹"})
+    sym.set_sym("latex", "\\@",     {""})
+    sym.set_sym("latex", '\\CE',    {"CE"})
+    sym.set_sym("latex", '\\CS',    {"ECS"})
+    sym.set_sym("latex", '\\Pr',    {"Pr"})
+    sym.set_sym("latex", '\\pr',    {"Pr(", ")"})
+    sym.set_sym("latex", "\\email", {"✉ :", ""})
+    sym.set_sym("latex", "\\gbar",  {"(",   " ︳", ")"})
+    sym.set_sym("latex", "\\gbar*", {"",    " ︳", ""})
+
+  end
 }
 
 ```
