@@ -472,7 +472,7 @@ local get_inline_text_macros = function(root, bufnr)
         end
 
         -- I'm making this two arguments to get rid of possible braces
-        M.sym.latex[key] = {val, ""}
+        M.sym.latex[key] = {{val, ""}}
       end
     end
   end

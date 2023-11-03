@@ -238,7 +238,6 @@ M.get_diacritic = function(cmd, txt, node)
     local line = vim.api.nvim_buf_get_lines(0, erow, erow + 1, true)
     nt = string.sub(line[1], ecol+1, ecol + 1)
     ecol = ecol + 1
-
   end
 
   if M.diacritics[nt] ~= nil then
