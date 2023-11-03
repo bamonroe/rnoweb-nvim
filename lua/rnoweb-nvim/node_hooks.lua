@@ -193,8 +193,9 @@ local conceal_cmd_fn = function(lang, node, cmd_name)
   local text = sym.get_sym_text(lang, cmd_name, node)
   if text ~= nil then
     if text["txt"] ~= nil then
+      cmd_range[2] = text["bcol"]
+      cmd_range[4] = text["ecol"]
       text = text["txt"]
-      cmd_range[4] = node_range[4]
     end
   end
 

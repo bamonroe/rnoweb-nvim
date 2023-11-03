@@ -227,10 +227,21 @@ M.diacritics["y"] = {
 
 M.get_diacritic = function(cmd, txt, node)
   -- If we're in this command, we already know exactly where the thing we want to use is
-  local nt = vim.treesitter.get_node_text(node:child(1):child(1), 0)
+  local cc = node:child_count()
+  local brow, bcol, erow, ecol = node:range()
+  local nt
+  if cc > 1 then
+    nt = vim.treesitter.get_node_text(node:child(1):child(1), 0)
+  else
+    local line = vim.api.nvim_buf_get_lines(0, erow, erow + 1, true)
+    nt = string.sub(line[1], ecol+1, ecol + 1)
+    ecol = ecol + 1
+
+  end
+
   if M.diacritics[nt] ~= nil then
     if M.diacritics[nt][cmd] ~= nil then
-      local val = {txt = {M.diacritics[nt][cmd]}, full = true}
+      local val = {txt = {M.diacritics[nt][cmd]}, full = true, bcol = bcol, ecol = ecol}
       return val
     end
   end

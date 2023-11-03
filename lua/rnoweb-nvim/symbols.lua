@@ -451,8 +451,25 @@ M.sym.latex["\\nicefrac"] = {{"(",  "╱ ", ")"}}
 M.sym.latex["\\dfrac"]    = {{"(",  "╱ ", ")"}}
 
 -- These commands look to replace the full command + text
+M.sym.latex['\\`'] = {txt = {"",  ""}, fn = super.get_diacritic}
 M.sym.latex["\\'"] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\^'] = {txt = {"",  ""}, fn = super.get_diacritic}
 M.sym.latex['\\"'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\H'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\~'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\c'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\k'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\l'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\='] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\b'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\.'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\d'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\r'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\u'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\v'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\t'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\o'] = {txt = {"",  ""}, fn = super.get_diacritic}
+M.sym.latex['\\i'] = {txt = {"",  ""}, fn = super.get_diacritic}
 
 -- Latex mappings can also include the underscored
 --for k, _ in pairs(M.sym.latex) do
