@@ -400,119 +400,73 @@ M.mdelimit = function(_, node, _)
 
 end
 
-M.single_hat = function(_, node, _)
-
-  local little_hats = {}
-    little_hats["a"] = "â"
-    little_hats["A"] = "Â"
-    little_hats["c"] = "ĉ"
-    little_hats["C"] = "Ĉ"
-    little_hats["e"] = "ê"
-    little_hats["E"] = "Ê"
-    little_hats["g"] = "ĝ"
-    little_hats["G"] = "Ĝ"
-    little_hats["i"] = "î"
-    little_hats["I"] = "Î"
-    little_hats["o"] = "ô"
-    little_hats["O"] = "Ô"
-    little_hats["s"] = "ŝ"
-    little_hats["S"] = "Ŝ"
-    little_hats["u"] = "û"
-    little_hats["U"] = "Û"
-    little_hats["w"] = "ŵ"
-    little_hats["W"] = "Ŵ"
-    little_hats["y"] = "ŷ"
-    little_hats["Y"] = "Ŷ"
-
-
-  local child = node:child(0)
-  local text = h.gtext(child)
-
-  local parent = node:parent():parent()
-
-  nconceal(parent, little_hats[text])
-
-end
-
-local ss_get_res = function(n, kind)
-
-  local res = ""
-
-  local type = n:type()
-
-  -- Actually, support only text/word until I can figure out how to remove overlapping extmarks
-  if type == "text" or type == "word" then
-    -- Change the text to superscripts if possible
-    if type == "text" then
-      local text = h.gtext(n)
-      local lcount = 1
-      for letter in text:gmatch(".") do
-        -- If the symbol is in the table, use it, otherwise go back to original
-        local luse = ss[kind][letter] and ss[kind][letter] or letter
-        if luse == letter and lcount == 1 then
-          luse = "_" .. luse
-        end
-        res = res .. luse
-        lcount = lcount + 1
-      end
-    elseif type == "word" then
-      local text = h.gtext(n)
-      text = string.sub(text, -1)
-      local tuse = ss[kind][text] and ss[kind][text] or "_" .. text
-      if text == tuse then
-        tuse = "_" .. tuse
-      end
-      res = res .. tuse
-    else
-      local text = h.gtext(n)
-      local luse = ss[kind][text] and ss[kind][text] or text
-      if text == luse then
-        luse = "_" .. luse
-      end
-      res = res .. luse
-    end
-  end
-
-  return res
-
-end
-
 M.subsuper = function(_, node, meta)
 
+  -- First we need to check the node's parents to see if we encounter a label_definition
+  local parent = node:parent()
+  local type = parent:type()
+  local check = false
+  while type ~= "source_file" do
+    type = parent:type()
+    if type == "label_definition" then
+      return(nil)
+    elseif type == "math_environment" then
+      check = true
+      break
+    end
+    parent = parent:parent()
+  end
+
+  -- Are we in some kind of math_environment?
+  if not check then
+    return(nil)
+  end
+
+
+  -- OK so we're actually in a math_environment
+  -- Sub or super?
   local kind = meta["kind"]
 
-  local range  = {node:range()}
-  local rbeg   = {range[1], range[2]}
-  local offsets = {bc = -1}
+  local beg_line, beg_col, end_line, end_col  = node:range()
+  -- I want to conceal the _ or ^ as well
+  beg_col = beg_col - 1
 
-  -- Attempt to stop sub/superscripts from being applied to
-  -- anything beyond the immediate curly group
-  local prev   = node:prev_sibling()
-  if prev == nil then
-    return({})
-  end
-  local prange = {prev:range()}
-  local pend   = {prange[3], prange[4]}
+  -- We need to substitute the text with the unicode sub/super characters
+  local text = ts.get_node_text(node, 0)
+  local tlen = #text
 
-  -- Check to see if the curly group is immediately after the previous sibling
-  local is_immediate = rbeg[1] == pend[1] and rbeg[2] == pend[2]
-  if not is_immediate then
-    return({})
-  end
+  local out = ""
 
-  local res = ""
-  if node:child_count() == 0 then
-    res = ss_get_res(node, kind)
-    -- There's only 1 character to be under-scored, so only conceal that char and the underscore
-    range[2] = range[4] - 2
-    offsets.bc = 0;
+  -- If the string is one character long, its not a curly group
+  if tlen == 1 then
+    out = ss[kind][text] == nil and text or ss[kind][text]
   else
-    for child, _ in node:iter_children() do
-      res = res .. ss_get_res(child, kind)
+    for i = 2, (tlen - 1) do
+      local c = string.sub(text, i, i)
+      c = ss[kind][c] == nil and c or ss[kind][c]
+      out = out .. c
     end
   end
 
-  nconceal(node, res, offsets, range)
+  -- Opening symbol
+  local opts = {
+    end_col = end_col,
+    end_line = end_line,
+    virt_text_pos = "overlay",
+    virt_text_hide = true,
+    conceal = out,
+    hl_group = "@function"
+  }
+
+  local clen = end_col - beg_col
+  h.mc_conceal(
+    info.bufnr,
+    info.ns,
+    beg_line,
+    beg_col,
+    opts,
+    clen
+  )
 
 end
 

@@ -1,4 +1,5 @@
 local M = {superscript = {}, subscript = {}, diacritics = {}}
+M.superscript[" "] = ''
 M.superscript["0"] = '⁰'
 M.superscript["1"] = '¹'
 M.superscript["2"] = '²'
@@ -67,6 +68,7 @@ M.superscript["."] = '˙'
 M.superscript["="] = '˭'
 
 
+M.subscript[' '] = ''
 M.subscript['0'] = '₀'
 M.subscript['1'] = '₁'
 M.subscript['2'] = '₂'

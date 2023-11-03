@@ -38,6 +38,7 @@ table.insert(M.queries.latex, {
   fn    = "citation",
   query = "(citation) @cite",
 })
+
 table.insert(M.queries.latex, {
   fn    = "mdelimit",
   query = "(math_delimiter) @math",
@@ -47,18 +48,6 @@ table.insert(M.queries.latex, {
   fn    = "text_mode",
   query = [[
     (text_mode) @cmd
-  ]],
-})
-
-table.insert(M.queries.latex, {
-  fn    = "single_hat",
-  query = [[
-    (generic_command
-      (command_name) @cmd (#eq? @cmd "\\hat") (#set! @cmd "ignore" "true")
-      (curly_group
-        (text) @tval (#any-of? @tval "a" "A" "c" "C" "e" "E" "g" "G" "i" "I" "o" "O" "s" "S" "u" "U" "w" "W" "y" "Y")
-      )
-    )
   ]],
 })
 
@@ -123,34 +112,31 @@ table.insert(M.queries.latex, {
 table.insert(M.queries.latex, {
   fn    = "subsuper",
   query = [[
-    (inline_formula
-      (text (word) @formula (#match? @formula ".*\\^") (#set! @formula "ignore" "true"))
-      (curly_group) @tval (#set! @tval "kind" "superscript")
+    (superscript
+      (curly_group
+        (text)
+      ) @tval (#set! @tval "kind" "superscript")
     )
   ]],
 })
+
+---[===[
 table.insert(M.queries.latex, {
   fn    = "subsuper",
   query = [[
-    (inline_formula
-      (text (word) @formula (#match? @formula ".*_") (#set! @formula "ignore" "true"))
-      (curly_group) @tval (#set! @tval "kind" "subscript")
+    (subscript
+      (curly_group
+        (text)
+      ) @tval (#set! @tval "kind" "subscript")
     )
   ]],
 })
+
 table.insert(M.queries.latex, {
   fn    = "subsuper",
   query = [[
-    (inline_formula
-      (text (word) @formula (#match? @formula ".*\\^.") (#set! @formula "kind" "superscript"))
-    )
-  ]],
-})
-table.insert(M.queries.latex, {
-  fn    = "subsuper",
-  query = [[
-    (inline_formula
-      (text (word) @formula (#match? @formula ".*_.") (#set! @formula "kind" "subscript"))
+    (superscript
+      (word) @tval (#set! @tval "kind" "superscript")
     )
   ]],
 })
@@ -159,73 +145,13 @@ table.insert(M.queries.latex, {
 table.insert(M.queries.latex, {
   fn    = "subsuper",
   query = [[
-    (math_environment
-      (text (word) @formula (#match? @formula ".*\\^") (#set! @formula "ignore" "true"))
-      (curly_group) @tval (#set! @tval "kind" "superscript")
-    )
-  ]],
-})
-table.insert(M.queries.latex, {
-  fn    = "subsuper",
-  query = [[
-    (math_environment
-      (text (word) @formula (#match? @formula ".*_") (#set! @formula "ignore" "true"))
-      (curly_group) @tval (#set! @tval "kind" "subscript")
-    )
-  ]],
-})
-table.insert(M.queries.latex, {
-  fn    = "subsuper",
-  query = [[
-    (math_environment
-      (text (word) @formula (#match? @formula ".*\\^.") (#set! @formula "kind" "superscript"))
-    )
-  ]],
-})
-table.insert(M.queries.latex, {
-  fn    = "subsuper",
-  query = [[
-    (math_environment
-      (text (word) @formula (#match? @formula ".*_.") (#set! @formula "kind" "subscript"))
-    )
+      (subscript
+        (word) @tval (#set! @tval "kind" "subscript")
+      )
   ]],
 })
 
-table.insert(M.queries.latex, {
-  fn    = "subsuper",
-  query = [[
-    (math_delimiter
-      (text (word) @formula (#match? @formula ".*\\^") (#set! @formula "ignore" "true"))
-      (curly_group) @tval (#set! @tval "kind" "superscript")
-    )
-  ]],
-})
-table.insert(M.queries.latex, {
-  fn    = "subsuper",
-  query = [[
-    (math_delimiter
-      (text (word) @formula (#match? @formula ".*_") (#set! @formula "ignore" "true"))
-      (curly_group) @tval (#set! @tval "kind" "subscript")
-    )
-  ]],
-})
-table.insert(M.queries.latex, {
-  fn    = "subsuper",
-  query = [[
-    (math_delimiter
-      (text (word) @formula (#match? @formula ".*\\^.") (#set! @formula "kind" "superscript"))
-    )
-  ]],
-})
-table.insert(M.queries.latex, {
-  fn    = "subsuper",
-  query = [[
-    (math_delimiter
-      (text (word) @formula (#match? @formula ".*_.") (#set! @formula "kind" "subscript"))
-    )
-  ]],
-})
-
+--]===]
 
 
 -- Lots of latex replacements
