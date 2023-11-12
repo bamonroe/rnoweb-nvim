@@ -1,0 +1,30 @@
+\documentclass[12pt,a4paper]{article}
+
+\include{packages.tex}
+
+\begin{document}
+
+\newcommand{\certeq}{CE}
+
+Expected Utility Theory, due to \textcite{VonNeumann1944}, is defined as:
+\begin{equation}
+  \label{eq:eut}
+  EU = \sum_i p_i \times u(x_i)
+\end{equation}
+\noindent where $u(x_i)$ is a utility function with the usual properties.\footnote{
+  For the uninitiated: completeness, transitivity, continuity, and positive
+  monotonicity.
+} The popular CRRA utility function \parencite{Pratt1964} is often used:
+\begin{equation}
+  \label{eq:crra}
+  u(x) = \frac{x^{1 - r}}{1 - r}
+\end{equation}
+\noindent A certainty equivalent, $\certeq{}$, of (\ref{eq:eut}) assuming the utility
+function in (\ref{eq:crra}) is defined as:
+\begin{align}
+  \frac{\certeq{}^{1 - r}}{1 - r} &= EU \\
+  \certeq{} &= \left[EU(1-r)\right]^\frac{1}{1 - r}
+\end{align}
+
+\end{document}
+

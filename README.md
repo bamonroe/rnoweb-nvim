@@ -82,21 +82,11 @@ note that fields 2+ can only be of length 2 or less.
 
 # Screenshots
 
-Some text from an article I'm writing showing off the citation replacement and footnote counting:
+Some example LaTeX without the plugin:  
 
-Without Plugin:  
-![Without Plugin](readme_media/citation_noplugin.png)
+![Without Plugin](readme_media/off.png)
 
-With Plugin:  
-![With Plugin](readme_media/citation_plugin.png)
-
-
-Some equation environments from the same article. Note the attempt at counting
-equation numbers and displaying the numbers in virtual text.
-
-Without Plugin:  
-![Without Plugin](readme_media/math_noplugin.png)
-
-With Plugin:  
-![With Plugin](readme_media/math_plugin.png)
-
+With the plugin, note numbered equations, sub and superscripts, numbered
+footnotes, citation concealment, and inline replacement of `\newcommand` that
+defines a text-only replacement:  
+![With Plugin](readme_media/on.png)
