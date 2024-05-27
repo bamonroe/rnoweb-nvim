@@ -117,7 +117,13 @@ M.mask_texsym = function()
   local parser = vim.treesitter.get_parser(info.bufnr)
   parser:for_each_tree(function(_, tree)
     local ttree = tree:parse()
-    local root  = ttree[1]:root()
+
+    local ttree1
+    for i,j in pairs(ttree) do
+      ttree1 = j
+      break
+    end
+    local root  = ttree1:root()
 
     for _, d in sym.get_queries(root, info.bufnr) do
       local lang   = d["lang"]
