@@ -133,21 +133,22 @@ table.insert(M.queries.latex, {
 })
 
 table.insert(M.queries.latex, {
-  fn    = "subsuper",
+  fn = "subsuper",
   query = [[
     (superscript
-      (word) @tval (#set! @tval "kind" "superscript")
+    (_) @tval
+    (#set! @tval "kind" "superscript")
     )
   ]],
 })
 
-
 table.insert(M.queries.latex, {
-  fn    = "subsuper",
+  fn = "subsuper",
   query = [[
-      (subscript
-        (word) @tval (#set! @tval "kind" "subscript")
-      )
+    (subscript
+    (_) @tval
+    (#set! @tval "kind" "subscript")
+    )
   ]],
 })
 
