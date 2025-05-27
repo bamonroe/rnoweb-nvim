@@ -660,6 +660,9 @@ local get_inline_text_macros = function(root, bufnr)
   for _, match, _ in query:iter_matches(root, bufnr) do
     local key = ""
     for id, node in pairs(match) do
+
+      node = node[1]
+
       if id == 1 then
         key = ts.get_node_text(node, 0)
         M.sym.latex[key] = {}

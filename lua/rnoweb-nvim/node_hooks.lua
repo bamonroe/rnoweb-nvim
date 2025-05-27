@@ -302,6 +302,8 @@ M.conceal_cmd = function(lang, node, _)
     field = "Sexpr"
   end
 
+  vim.print(node)
+
   local cmd_node = node:field(field)
   cmd_node = cmd_node[1]
   if cmd_node == nil then return nil end

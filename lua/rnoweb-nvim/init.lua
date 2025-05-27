@@ -78,6 +78,7 @@ M.mask_inline = function()
       -- Need to count matches to correctly get the code results
       count = count + 1
       -- Get the rane of this node
+      node = node[1]
       local l0, c0, _, c1 = node:range()
       -- Get the text that will be in this ndoe
       local fname = "./inline/" .. count .. ".txt"
@@ -135,6 +136,7 @@ M.mask_texsym = function()
         -- metadata per match
         local nmatches = h.tlen(match)
         for id, node in pairs(match) do
+          node = node[1]
           -- Get the per-match metadata
           local mmeta = meta and meta or {}
           if nmatches > 0 then
