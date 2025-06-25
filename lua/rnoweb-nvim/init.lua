@@ -161,6 +161,37 @@ M.refresh = function()
     M.mask_inline()
 end
 
+M.compile_rnw = function()
+  local rnw_path = vim.api.nvim_buf_get_name(0)
+
+  if not rnw_path:match("%.Rnw$") then
+    print("Current buffer is not an .Rnw file.")
+    return
+  end
+
+  -- Compute the corresponding .tex output path
+  local tex_path = rnw_path:gsub("%.Rnw$", ".tex")
+
+  -- Escape backslashes on Windows if needed
+  local esc_rnw = rnw_path:gsub("\\", "\\\\")
+  local esc_tex = tex_path:gsub("\\", "\\\\")
+
+  -- Step 1: Knit to tex
+  local knit_cmd = string.format([[R -e 'knitr::knit("%s", output = "%s")']], esc_rnw, esc_tex)
+
+  -- Step 2: Compile to PDF using latexmk
+  local latex_cmd = string.format("latexmk -f -pdf %s", vim.fn.shellescape(tex_path))
+
+  -- Combine both commands using a shell
+  local full_cmd = string.format("%s && %s", knit_cmd, latex_cmd)
+
+  -- Run in terminal split
+  vim.cmd("botright split | terminal " .. full_cmd)
+end
+
+-- Create a user command for easy invocation
+vim.api.nvim_create_user_command("CompileRnw", M.compile_rnw, {})
+
 --[[
 M.test = function()
   vim.print('in test')
