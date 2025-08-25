@@ -180,13 +180,32 @@ M.compile_rnw = function()
   local knit_cmd = string.format([[R -e 'knitr::knit("%s", output = "%s")']], esc_rnw, esc_tex)
 
   -- Step 2: Compile to PDF using latexmk
-  local latex_cmd = string.format("latexmk -f -pdf %s", vim.fn.shellescape(tex_path))
+  local latex_cmd = string.format("latexmk -pdf -shell-escape %s", vim.fn.shellescape(tex_path))
 
   -- Combine both commands using a shell
   local full_cmd = string.format("%s && %s", knit_cmd, latex_cmd)
 
-  -- Run in terminal split
-  vim.cmd("botright split | terminal " .. full_cmd)
+  -- Open terminal split and capture buffer number
+  vim.cmd("botright new") -- opens a new empty buffer in a split
+  local term_buf = vim.api.nvim_get_current_buf()
+
+  -- Start the terminal job
+  vim.fn.termopen(full_cmd, {
+    on_exit = function(_, code, _)
+      if code == 0 then
+        -- Delay close to give terminal a chance to flush output
+        vim.defer_fn(function()
+          -- Make sure buffer still exists
+          if vim.api.nvim_buf_is_loaded(term_buf) then
+            vim.api.nvim_buf_delete(term_buf, { force = true })
+          end
+        end, 500) -- 500ms delay
+      else
+        print("Compile failed (exit code " .. code .. "). Terminal left open.")
+      end
+    end,
+  })
+
 end
 
 -- Create a user command for easy invocation
