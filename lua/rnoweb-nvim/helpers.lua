@@ -1,6 +1,8 @@
 local ts   = vim.treesitter
 local info = require'rnoweb-nvim.info'
-local db   = require'rnoweb-nvim.dbug'
+
+-- Cache frequently used functions
+local nvim_buf_set_extmark = vim.api.nvim_buf_set_extmark
 
 local M = {}
 
@@ -87,13 +89,10 @@ M.gmatch = function(s)
 end
 
 M.isin = function(v, t)
-  local res = false
-  for _, val in pairs(t) do
-    if not res then
-      res = v == val
-    end
+  for _, val in ipairs(t) do
+    if v == val then return true end
   end
-  return res
+  return false
 end
 
 -- Check if a file exists
@@ -105,11 +104,13 @@ end
 
 -- Read lines from file into a table
 M.read_lines = function(file)
-  if not M.file_exists(file) then return {} end
+  local f = io.open(file, "r")
+  if not f then return {} end
   local lines = {}
-  for line in io.lines(file) do
+  for line in f:lines() do
     lines[#lines + 1] = line
   end
+  f:close()
   return lines
 end
 
@@ -132,63 +133,36 @@ M.gtext = function(node)
 end
 
 M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
+  local conceal_text = opts.conceal
+  if conceal_text == nil then return end
 
+  local end_line = opts.end_line or beg_line
 
-  local conceal_text = opts["conceal"]
-  local conceal_len  = M.slen(conceal_text)
-  local conceal_utf8 = M.gmatch(conceal_text)
-
-  opts["hl_group"] = opts["hl_group"] and opts["hl_group"] or "Conceal"
-
-  local padding = node_len - conceal_len
-
-  -- Firstly, conceal the padding
-  local nopts = {
-    end_line       = opts["end_line"],
-    end_col        = beg_col + padding,
-    virt_text      = {{'', opts["hl_group"]}},
-    virt_text_pos  = "overlay",
-    virt_text_hide = true,
-    conceal        = '',
---    hl_group       = opts["hl_group"],
-  }
-
-  if padding > -1 then
-    info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
-      bufnr,
-      ns,
-      beg_line,
-      beg_col,
-      nopts)
+  if type(conceal_text) ~= "string" then
+    conceal_text = tostring(conceal_text)
   end
 
-  local end_line = opts["end_line"] or beg_line
+  local conceal_len = M.slen(conceal_text)
+  local padding = node_len - conceal_len
+  local ids = info.ids
 
-  for i = 1,conceal_len do
-    local nbeg_col = beg_col + padding + i - 1
-    local end_col  = beg_col + padding + i
+  -- Reusable options table
+  local nopts = { end_line = end_line, end_col = 0, conceal = '' }
 
-    local cchar = conceal_utf8[i]
-    local vtext = ''
-    local pos   = "overlay"
+  -- First, conceal the padding (extra chars that need to be hidden)
+  if padding > 0 then
+    nopts.end_col = beg_col + padding
+    nopts.conceal = ''
+    ids[#ids + 1] = nvim_buf_set_extmark(bufnr, ns, beg_line, beg_col, nopts)
+  end
 
-    nopts = {
-      end_line       = end_line,
-      end_col        = end_col,
-      virt_text      = {{vtext, opts["hl_group"]}},
-      virt_text_pos  = pos,
-      virt_text_hide = true,
-      hl_group       = opts["hl_group"],
-      conceal        = cchar,
-      strict         = false,
-    }
-
-    info.ids[#info.ids+1] = vim.api.nvim_buf_set_extmark(
-      bufnr,
-      ns,
-      beg_line,
-      nbeg_col,
-      nopts)
+  -- Then create one extmark per conceal character
+  local col = beg_col + padding
+  for char in conceal_text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    nopts.end_col = col + 1
+    nopts.conceal = char
+    ids[#ids + 1] = nvim_buf_set_extmark(bufnr, ns, beg_line, col, nopts)
+    col = col + 1
   end
 end
 

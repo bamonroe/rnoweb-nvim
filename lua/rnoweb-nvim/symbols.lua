@@ -1,7 +1,10 @@
-local ts = vim.treesitter
 local q  = vim.treesitter.query
 local info  = require'rnoweb-nvim.info'
 local super = require'rnoweb-nvim.super_list'
+local h     = require'rnoweb-nvim.helpers'
+
+-- Cache for compiled treesitter queries
+local compiled_queries = {}
 
 local M = {
   sym = {
@@ -20,13 +23,26 @@ local M = {
   },
 }
 
--- Not many rnoweb queies available
+-- Rnoweb-specific queries
 table.insert(M.queries.rnoweb, {
   fn    = "conceal_cmd",
   query = "(rinline) @cmd",
 })
 
+-- Rnoweb symbol for \Sexpr
 M.sym.rnoweb["\\Sexpr"]  = {"ﳒ"}
+
+-- PythonTeX symbols (these are LaTeX commands, so go in latex table)
+-- \py{expr} - prints value of expression
+M.sym.latex["\\py"]      = {{"", ""}}
+-- \pyc{code} - executes code
+M.sym.latex["\\pyc"]     = {{"⌘", ""}}
+-- \pys{code} - substitution
+M.sym.latex["\\pys"]     = {{"", ""}}
+-- \pyb{code} - execute and prettyprint
+M.sym.latex["\\pyb"]     = {{"", ""}}
+-- \pyv{code} - prettyprint code only
+M.sym.latex["\\pyv"]     = {{"", ""}}
 
 -- Lots for Latex
 table.insert(M.queries.latex, {
@@ -643,31 +659,42 @@ end
 
 -- Sometimes I define new macros that are just text shortcuts
 -- Let's find those newcommands and define them as simple conceals
+-- Cached query for inline text macros
+local inline_macro_query = nil
+
 local get_inline_text_macros = function(root, bufnr)
+  -- Only re-scan if buffer has changed since last scan
+  local tick = vim.api.nvim_buf_get_changedtick(bufnr)
+  if tick == info.last_macro_tick then
+    return  -- Skip if buffer unchanged
+  end
+  info.last_macro_tick = tick
 
-  local query = [[
-    (new_command_definition
-      (curly_group_command_name
-        (command_name) @cname
+  -- Cache the query on first use
+  if not inline_macro_query then
+    inline_macro_query = q.parse("latex", [[
+      (new_command_definition
+        (curly_group_command_name
+          (command_name) @cname
+        )
+        (curly_group
+          (text) @text
+        )
       )
-      (curly_group
-        (text) @text
-      )
-    )
-  ]]
-  query = q.parse("latex", query)
+    ]])
+  end
 
-  for _, match, _ in query:iter_matches(root, bufnr) do
+  for _, match, _ in inline_macro_query:iter_matches(root, bufnr) do
     local key = ""
     for id, node in pairs(match) do
 
       node = node[1]
 
       if id == 1 then
-        key = ts.get_node_text(node, 0)
+        key = h.gtext(node)
         M.sym.latex[key] = {}
       else
-        local val = ts.get_node_text(node, 0)
+        local val = h.gtext(node)
 
         local klen = string.len(key)
         local vlen = string.len(val)
@@ -691,11 +718,22 @@ M.get_queries = function(root, bufnr)
   get_inline_text_macros(root, bufnr)
 
   local out = {}
-  for _, lang in pairs(M.lang_queries[info.ft]) do
+  local langs = M.lang_queries[info.ft]
+  if langs == nil then
+    return pairs(out)
+  end
+  for _, lang in pairs(langs) do
     for _, k in ipairs(M.queries[lang]) do
       local name  = k["fn"]
-      local query = k["query"]
-      query = q.parse(lang, query)
+      local query_str = k["query"]
+
+      -- Cache compiled queries by lang:name key
+      local cache_key = lang .. ":" .. name
+      if not compiled_queries[cache_key] then
+        compiled_queries[cache_key] = q.parse(lang, query_str)
+      end
+      local query = compiled_queries[cache_key]
+
       out[#out+1] = {
         cmd   = name,
         lang  = lang,

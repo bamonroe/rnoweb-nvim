@@ -1,9 +1,12 @@
-local ts   = vim.treesitter
 local q    = vim.treesitter.query
 local sym  = require'rnoweb-nvim.symbols'
 local h    = require'rnoweb-nvim.helpers'
 local info = require'rnoweb-nvim.info'
 local ss   = require'rnoweb-nvim.super_list'
+
+-- Cached citation queries (compiled lazily on first use)
+local citation_keys_query = nil
+local citation_prenote_query = nil
 
 local M = {}
 
@@ -107,13 +110,14 @@ M.citation = function(lang, node, meta)
   -- Is this a parencite?
   local is_paren = text:match("^\\parencite") and true or false
 
-  -- The query for the author
-  local kq = q.parse(lang, "(curly_group_text_list (text) @keys )")
-  -- The query for any pre-notes
-  local pq = q.parse(lang, "(brack_group (text) @prenote )")
+  -- Cache citation queries on first use
+  if not citation_keys_query then
+    citation_keys_query = q.parse(lang, "(curly_group_text_list (text) @keys )")
+    citation_prenote_query = q.parse(lang, "(brack_group (text) @prenote )")
+  end
 
   local keys = {}
-  for _, v in kq:iter_captures(node, info.bufnr) do
+  for _, v in citation_keys_query:iter_captures(node, info.bufnr) do
     local k = h.gtext(v)
     keys[#keys+1] = k
   end
@@ -122,7 +126,7 @@ M.citation = function(lang, node, meta)
 
   -- Some citations will have a prenote
   local counter = 0
-  for _, v in pq:iter_captures(node, info.bufnr) do
+  for _, v in citation_prenote_query:iter_captures(node, info.bufnr) do
     counter = counter + 1
     keys[counter].pn = h.gtext(v)
   end
@@ -306,7 +310,7 @@ M.conceal_cmd = function(lang, node, _)
   cmd_node = cmd_node[1]
   if cmd_node == nil then return nil end
 
-  local cmd_name = ts.get_node_text(cmd_node, info.bufnr)
+  local cmd_name = h.gtext(cmd_node)
 
   local text = sym.get_sym_text(lang, cmd_name, node)
   if text ~= nil then
@@ -432,7 +436,7 @@ M.subsuper = function(_, node, meta)
   beg_col = beg_col - 1
 
   -- We need to substitute the text with the unicode sub/super characters
-  local text = ts.get_node_text(node, 0)
+  local text = h.gtext(node)
   local tlen = #text
 
   local out = ""
@@ -566,7 +570,7 @@ M.math_count = function(_, node, _)
 
     -- If we hit a line break, we increment the equation number,
     -- if we hit a label definition, we assigned the label
-    while true do
+    while ctx ~= nil do
 
       -- If at any point you have consequtive equations in an align
       -- environment, they all get subsumed under a parent "text" node
