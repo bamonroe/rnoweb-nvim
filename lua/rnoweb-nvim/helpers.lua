@@ -146,20 +146,29 @@ M.mc_conceal = function(bufnr, ns, beg_line, beg_col, opts, node_len)
   local padding = node_len - conceal_len
   local ids = info.ids
 
+  -- Get the actual line length to avoid end_col out of range errors
+  local line = vim.api.nvim_buf_get_lines(bufnr, beg_line, beg_line + 1, false)[1]
+  local line_len = line and #line or 0
+
+  -- Calculate the max end column (node end position)
+  local max_end_col = math.min(beg_col + node_len, line_len)
+
   -- Reusable options table
   local nopts = { end_line = end_line, end_col = 0, conceal = '' }
 
   -- First, conceal the padding (extra chars that need to be hidden)
   if padding > 0 then
-    nopts.end_col = beg_col + padding
+    nopts.end_col = math.min(beg_col + padding, max_end_col)
     nopts.conceal = ''
     ids[#ids + 1] = nvim_buf_set_extmark(bufnr, ns, beg_line, beg_col, nopts)
   end
 
   -- Then create one extmark per conceal character
-  local col = beg_col + padding
+  local col = beg_col + math.max(padding, 0)
   for char in conceal_text:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
-    nopts.end_col = col + 1
+    -- Stop if we've exceeded the node bounds
+    if col >= max_end_col then break end
+    nopts.end_col = math.min(col + 1, max_end_col)
     nopts.conceal = char
     ids[#ids + 1] = nvim_buf_set_extmark(bufnr, ns, beg_line, col, nopts)
     col = col + 1
