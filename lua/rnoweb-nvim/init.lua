@@ -30,6 +30,7 @@ M.setup = function(opts)
 
   if M.opts.set_conceal then
     vim.o.conceallevel = 2
+    vim.o.concealcursor = ""  -- Unconceal on cursor line in all modes
   end
 
   -- Optionally force tex files to be recognized as latex
