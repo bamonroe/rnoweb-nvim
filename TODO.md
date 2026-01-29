@@ -4,11 +4,6 @@
 
 ## Bugs
 
-- [ ] Math conceal doesn't unconceal on cursor line
-  - Concealed text using extmarks doesn't reveal when cursor moves to that line
-  - Expected: cursor line shows original LaTeX commands (standard conceal behavior)
-  - Likely related to extmarks not respecting `concealcursor` setting
-
 ## Features
 
 - [ ] Citation conceal with bibliography lookup (blocked: waiting for anti-conceal in Neovim)
@@ -19,3 +14,11 @@
 
 ## Completed
 
+- [x] Math conceal doesn't unconceal on cursor line
+  - Restored `virt_text_hide` option removed during performance refactor
+  - Set `concealcursor` to empty string for all-mode unconcealing
+- [x] Equation/figure/footnote counts not resetting on refresh
+  - Fixed by resetting count values in place instead of creating new table
+- [x] Subsection counting and label support
+  - Labels now show as "section.subsection" format (e.g., "5.2")
+  - Sections and subsections processed in document order
