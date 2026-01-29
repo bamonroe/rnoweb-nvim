@@ -99,7 +99,10 @@ table.insert(M.queries.latex, {
 table.insert(M.queries.latex, {
   fn    = "section_count",
   query = [[
-    (section) @sec
+    [
+      (section)
+      (subsection)
+    ] @sec
   ]],
 })
 

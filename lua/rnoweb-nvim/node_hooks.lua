@@ -498,14 +498,26 @@ M.fig_lab_count = function(_, node, _)
 end
 
 M.section_count = function(_, node, _)
-  info.counts.sections = info.counts.sections + 1
-  local sec = info.counts.sections
+  local node_type = node:type()
+  local label_value
+
+  if node_type == "section" then
+    info.counts.sections = info.counts.sections + 1
+    info.counts.subsections = 0  -- Reset subsection count for new section
+    label_value = info.counts.sections
+  elseif node_type == "subsection" then
+    info.counts.subsections = info.counts.subsections + 1
+    label_value = info.counts.sections .. "." .. info.counts.subsections
+  else
+    return
+  end
+
   for c, _ in node:iter_children() do
-    local type = c:type()
-    if type == "label_definition" then
+    local ctype = c:type()
+    if ctype == "label_definition" then
       local lab = c:field("name")[1]:child(1)
       lab = h.gtext(lab)
-      info.lab_numbers[lab] = sec
+      info.lab_numbers[lab] = label_value
     end
   end
 end

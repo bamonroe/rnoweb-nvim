@@ -15,6 +15,7 @@ M.get_buf_state = function(bufnr)
         footnote = 0,
         figures = 0,
         sections = 0,
+        subsections = 0,
         equations = 0,
       },
       last_macro_tick = 0,
@@ -27,12 +28,15 @@ M.reset = function()
   local state = M.get_buf_state(M.bufnr)
   state.ids = {}
   state.lab_numbers = {}
-  state.counts = {
-    footnote = 0,
-    figures = 0,
-    sections = 0,
-    equations = 0,
-  }
+  -- Reset counts in place to preserve reference from M.counts
+  state.counts.footnote = 0
+  state.counts.figures = 0
+  state.counts.sections = 0
+  state.counts.subsections = 0
+  state.counts.equations = 0
+  -- Update module-level references
+  M.ids = state.ids
+  M.lab_numbers = state.lab_numbers
 end
 
 -- Update info for current buffer (called on every refresh)
